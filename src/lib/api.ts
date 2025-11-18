@@ -110,9 +110,24 @@ export const ShipmentAPI = {
 
 // Issue tracking endpoints
 export const IssuesAPI = {
+  // Get all pending issues (not resolved)
   getPending: async () => {
     const response = await authenticatedFetch('/shipments/issues/pending');
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    return response.json();
+  },
+  
+  // Get all issues (including resolved)
+  getAll: async () => {
+    const response = await authenticatedFetch('/shipments/issues/all');
+    if (!response.ok) {
+      // Fallback to pending if /all endpoint doesn't exist
+      if (response.status === 404) {
+        console.warn('Using /pending endpoint as fallback');
+        return IssuesAPI.getPending();
+      }
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
     return response.json();
   },
   

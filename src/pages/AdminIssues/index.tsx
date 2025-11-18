@@ -14,10 +14,18 @@ export default function AdminIssues() {
 
   const fetchIssues = async () => {
     try {
-      setLoading(true);
       setError(null);
-      const data = await IssuesAPI.getPending();
-      setIssues(data);
+      // Try to get all issues (including resolved)
+      const data = await IssuesAPI.getAll();
+      console.log('Fetched issues:', data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setIssues(data);
+      } else {
+        console.error('Invalid data format:', data);
+        setIssues([]);
+      }
     } catch (err) {
       console.error('Failed to fetch issues:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch issues');
