@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { IssuesAPI } from '@/lib/api';
+import type { ShipmentIssue } from '@/types/issue';
 
 interface DeliveryBoyStatusProps {
   shipmentId: string | number;  // Accept both types
@@ -14,15 +17,18 @@ interface DeliveryBoyResponse {
 }
 
 function DeliveryBoyStatus({ shipmentId, shipmentStatus }: DeliveryBoyStatusProps) {
+  const navigate = useNavigate();
   const [responses, setResponses] = useState<DeliveryBoyResponse[]>([]);
   const [acceptedRider, setAcceptedRider] = useState<DeliveryBoyResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shipmentIssues, setShipmentIssues] = useState<ShipmentIssue[]>([]);
 
   useEffect(() => {
     // Reset state when shipment changes
     setResponses([]);
     setAcceptedRider(null);
     setLoading(true);
+    setShipmentIssues([]);
     
     // Poll for delivery boy responses
     const fetchResponses = async () => {
@@ -56,18 +62,33 @@ function DeliveryBoyStatus({ shipmentId, shipmentStatus }: DeliveryBoyStatusProp
       }
     };
 
+    // Fetch issues for this shipment
+    const fetchIssues = async () => {
+      try {
+        const allIssues = await IssuesAPI.getPending();
+        const shipmentRelatedIssues = allIssues.filter(
+          (issue: ShipmentIssue) => issue.shipmentId === Number(shipmentId)
+        );
+        setShipmentIssues(shipmentRelatedIssues);
+      } catch (error) {
+        console.error('Failed to fetch issues:', error);
+      }
+    };
+
     // Initial fetch
     fetchResponses();
+    fetchIssues();
     
-    // Poll every 3 seconds until someone accepts
+    // Poll every 3 seconds
     const interval = setInterval(() => {
       if (!acceptedRider) {
         fetchResponses();
       }
+      fetchIssues();
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [shipmentId, shipmentStatus]);
+  }, [shipmentId, shipmentStatus, acceptedRider]);
 
   if (loading) {
     return (
@@ -99,25 +120,67 @@ function DeliveryBoyStatus({ shipmentId, shipmentStatus }: DeliveryBoyStatusProp
 
       <div className="p-6">
         {acceptedRider ? (
-          <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+          <>
+            <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-green-900 text-lg">Accepted!</h4>
+                  <p className="text-sm text-green-700 mt-1">{acceptedRider.riderName}</p>
+                  <p className="text-sm text-green-600">📞 {acceptedRider.riderMobile}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-green-900 text-lg">Accepted!</h4>
-                <p className="text-sm text-green-700 mt-1">{acceptedRider.riderName}</p>
-                <p className="text-sm text-green-600">📞 {acceptedRider.riderMobile}</p>
+              <div className="mt-3 pt-3 border-t border-green-200">
+                <p className="text-xs text-green-700">
+                  ✅ Delivery boy has received full customer location and mobile number
+                </p>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-green-200">
-              <p className="text-xs text-green-700">
-                ✅ Delivery boy has received full customer location and mobile number
-              </p>
-            </div>
-          </div>
+
+            {/* Show issue notification if there are any issues for this shipment */}
+            {shipmentIssues.length > 0 && (
+              <div className="mt-4 bg-red-50 border-2 border-red-500 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-red-900 text-lg">⚠️ Delivery Issue Reported</h4>
+                    <p className="text-sm text-red-700 mt-1">
+                      {shipmentIssues[0].issueType}
+                    </p>
+                    {shipmentIssues[0].status === 'reported' && (
+                      <p className="text-xs text-red-600 mt-1">
+                        🟡 Waiting for your response
+                      </p>
+                    )}
+                    {shipmentIssues[0].status === 'admin_responded' && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        🔵 Waiting for rider action
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-red-200">
+                  <button
+                    onClick={() => navigate('/issues')}
+                    className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Click here to view and respond to issue
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div>
             {/* Show different message based on whether riders were notified */}
