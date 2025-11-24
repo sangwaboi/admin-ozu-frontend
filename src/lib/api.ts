@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL || "https://ozu-source-code.onrender.com";
+const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL || "https://ozu-source-code.onrender.com/api";
 
 /**
  * Get the current Supabase session token
