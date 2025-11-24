@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { ShipmentAPI } from '../../lib/api';
+import { ShipmentAPI, IssuesAPI } from '../../lib/api';
 import type { AdminAddress } from '../../types/address';
 import AddressSelector from '../../components/AddressSelector';
 import ShipmentForm from './ShipmentForm';
@@ -46,6 +46,7 @@ function AdminShipment() {
   const [activeShipment, setActiveShipment] = useState<any>(null);
   const [currentTab, setCurrentTab] = useState<'active' | 'completed'>('active');
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [shipmentIssues, setShipmentIssues] = useState<Record<string | number, number>>({});
   
   // Use refs to track state without causing re-renders in useEffect
   const allShipmentsRef = useRef<any[]>([]);
@@ -103,6 +104,36 @@ function AdminShipment() {
     }, 5000);
   }, []);
 
+  // Fetch issues for shipments
+  const fetchShipmentIssues = useCallback(async (shipments: any[]) => {
+    const issuesMap: Record<string | number, number> = {};
+    
+    try {
+      // Fetch issues for each shipment in parallel
+      await Promise.all(
+        shipments.map(async (shipment) => {
+          try {
+            const data = await IssuesAPI.getByShipmentId(shipment.id);
+            // Count only unresolved issues (reported or admin_responded)
+            const unresolvedCount = (data.issues || []).filter(
+              (issue: any) => issue.status !== 'resolved'
+            ).length;
+            if (unresolvedCount > 0) {
+              issuesMap[shipment.id] = unresolvedCount;
+            }
+          } catch (error) {
+            // Silently fail for individual shipments
+            console.error(`Error fetching issues for shipment ${shipment.id}:`, error);
+          }
+        })
+      );
+      
+      setShipmentIssues(issuesMap);
+    } catch (error) {
+      console.error('Error fetching shipment issues:', error);
+    }
+  }, []);
+
   // Fetch active shipments - use useCallback to memoize
   const fetchActiveShipments = useCallback(async () => {
     try {
@@ -145,6 +176,9 @@ function AdminShipment() {
         
         // Update state
         setAllShipments(data);
+        
+        // Fetch issues for each shipment
+        fetchShipmentIssues(data);
         
         // Update active shipment if it still exists
         const currentActiveShipment = activeShipmentRef.current;
@@ -340,14 +374,19 @@ function AdminShipment() {
               </button>
               <button
                 onClick={() => navigate('/issues')}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 flex items-center gap-2 font-semibold relative"
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 font-semibold relative transition-all ${
+                  issueCounts.pending > 0
+                    ? 'bg-red-600 text-white hover:bg-red-700 animate-pulse'
+                    : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                }`}
+                title={issueCounts.pending > 0 ? `${issueCounts.pending} issue(s) need attention` : 'View issues'}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                Issues
+                {issueCounts.pending > 0 ? '⚠️ Issues' : 'Issues'}
                 {issueCounts.pending > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-white text-red-600 text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-red-600 shadow-lg">
                     {issueCounts.pending}
                   </span>
                 )}
@@ -482,7 +521,7 @@ function AdminShipment() {
                         <button
                           key={shipment.id}
                           onClick={() => handleShipmentSwitch(index)}
-                          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all relative ${
                             activeShipmentIndex === index
                               ? 'bg-blue-600 text-white shadow-md'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -500,9 +539,20 @@ function AdminShipment() {
                               {shipment.status === 'picked_up' && (
                                 <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" title="Picked up - On the way"></span>
                               )}
+                              {shipmentIssues[shipment.id] && (
+                                <span className="flex items-center gap-1 text-xs" title={`${shipmentIssues[shipment.id]} issue(s) reported`}>
+                                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                                  <span className={activeShipmentIndex === index ? 'text-yellow-200' : 'text-red-600'}>⚠️</span>
+                                </span>
+                              )}
                             </div>
                             {shipment.status === 'picked_up' && (
-                              <span className="text-xs text-blue-600 font-medium">🚴 On the way</span>
+                              <span className={`text-xs font-medium ${activeShipmentIndex === index ? 'text-blue-100' : 'text-blue-600'}`}>🚴 On the way</span>
+                            )}
+                            {shipmentIssues[shipment.id] && (
+                              <span className={`text-xs font-medium ${activeShipmentIndex === index ? 'text-yellow-100' : 'text-red-600'}`}>
+                                ⚠️ Issue reported
+                              </span>
                             )}
                           </div>
                         </button>

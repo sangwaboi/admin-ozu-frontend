@@ -176,5 +176,17 @@ export const IssuesAPI = {
     
     return response.json();
   },
+  
+  // Get issues for a specific shipment
+  getByShipmentId: async (shipmentId: string | number) => {
+    const response = await authenticatedFetch(`/shipments/${shipmentId}/issues`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { issues: [] }; // No issues found
+      }
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  },
 };
 
