@@ -558,7 +558,6 @@ function AdminShipment() {
               <>
                 <DeliveryBoyStatus 
                   shipmentId={activeShipment.id}
-                  shipmentStatus={activeShipment.status}
                 />
                 <LiveTrackingMap
                   adminLocation={selectedAddress ? {

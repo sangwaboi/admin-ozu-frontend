@@ -5,7 +5,6 @@ import type { ShipmentIssue } from '@/types/issue';
 
 interface DeliveryBoyStatusProps {
   shipmentId: string | number;  // Accept both types
-  shipmentStatus?: string;  // The shipment status (pending, assigned, etc.)
 }
 
 interface DeliveryBoyResponse {
@@ -16,7 +15,7 @@ interface DeliveryBoyResponse {
   timestamp: string;
 }
 
-function DeliveryBoyStatus({ shipmentId, shipmentStatus }: DeliveryBoyStatusProps) {
+function DeliveryBoyStatus({ shipmentId }: DeliveryBoyStatusProps) {
   const navigate = useNavigate();
   const [responses, setResponses] = useState<DeliveryBoyResponse[]>([]);
   const [acceptedRider, setAcceptedRider] = useState<DeliveryBoyResponse | null>(null);
