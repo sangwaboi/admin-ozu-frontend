@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { TenantAPI } from '../../lib/api';
 import { QRCodeSVG } from 'qrcode.react';
-import { ArrowLeft, Copy, Download, CheckCircle, AlertCircle, Store, Share2, QrCode } from 'lucide-react';
+import { ArrowLeft, Copy, Download, CheckCircle, AlertCircle, Store, Share2, QrCode, PlusCircle } from 'lucide-react';
 
 interface Tenant {
   id: number;
@@ -19,9 +19,12 @@ export default function TenantSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
+  const [missingTenant, setMissingTenant] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
-  // WhatsApp Business number - should be configurable or from env
-  const whatsappNumber = '91959XXXXXXX'; // TODO: Get from backend or env
+  // WhatsApp Business number - configurable via env
+  const whatsappNumber = import.meta.env.VITE_WABA_NUMBER || '91959XXXXXXX';
 
   useEffect(() => {
     if (user) {
@@ -29,21 +32,58 @@ export default function TenantSettings() {
     }
   }, [user]);
 
+  const generateJoinCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
+
   const loadTenant = async () => {
     setIsLoading(true);
     setError(null);
+    setMissingTenant(false);
+    setMessage(null);
     
     try {
       const data = await TenantAPI.getMyTenant();
       if (data) {
         setTenant(data);
       } else {
-        setError('Tenant not found. Please contact support.');
+        setMissingTenant(true);
       }
     } catch (err: any) {
       console.error('Error loading tenant:', err);
       setError(err.message || 'Failed to load tenant information');
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createTenant = async () => {
+    if (!user) return;
+    setIsCreating(true);
+    setError(null);
+    setMessage(null);
+
+    const tenantName =
+      (user.user_metadata as any)?.shopName ||
+      (user.user_metadata as any)?.name ||
+      'My Shop';
+    const joinCode = generateJoinCode();
+
+    try {
+      const created = await TenantAPI.create(tenantName, joinCode);
+      setTenant(created);
+      setMissingTenant(false);
+      setMessage({ type: 'success', text: 'Tenant created. Share this join code with riders.' });
+    } catch (err: any) {
+      console.error('Error creating tenant:', err);
+      setError(err.message || 'Failed to create tenant');
+    } finally {
+      setIsCreating(false);
       setIsLoading(false);
     }
   };
@@ -125,27 +165,68 @@ export default function TenantSettings() {
     );
   }
 
-  if (error && !tenant) {
+  if (missingTenant) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center gap-3 text-red-800 mb-4">
-              <AlertCircle className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Error</h2>
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/profile')}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5 text-gray-600" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Shop Join Code</h1>
+                <p className="text-sm text-gray-500 mt-1">Create a tenant to get your join code</p>
+              </div>
             </div>
-            <p className="text-gray-700 mb-4">{error}</p>
-            <button
-              onClick={() => navigate('/profile')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Go to Profile
-            </button>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+            <div className="flex items-center gap-3 text-red-800">
+              <AlertCircle className="h-5 w-5" />
+              <h2 className="text-lg font-semibold">Tenant not found</h2>
+            </div>
+            <p className="text-gray-700">Create your tenant to generate a join code and onboard riders.</p>
+            {error && (
+              <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={createTenant}
+                disabled={isCreating}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-2 font-medium transition-colors"
+              >
+                {isCreating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="h-4 w-4" />
+                    Create Tenant
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => navigate('/profile')}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+              >
+                Go to Profile
+              </button>
+            </div>
           </div>
         </div>
       </div>
     );
   }
+
+  const joinLink = generateJoinLink();
 
   const joinLink = generateJoinLink();
 
