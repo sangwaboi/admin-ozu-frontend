@@ -23,7 +23,14 @@ export default function TenantSettings() {
   const [isCreating, setIsCreating] = useState(false);
   
   // WhatsApp Business number - configurable via env
-  const whatsappNumber = import.meta.env.VITE_WABA_NUMBER
+  // Note: Vite env vars are replaced at BUILD time, so you must rebuild after adding to Netlify
+  const whatsappNumber = import.meta.env.VITE_WABA_NUMBER || '919594948009';
+  
+  // Debug: Log env var (remove in production)
+  useEffect(() => {
+    console.log('VITE_WABA_NUMBER:', import.meta.env.VITE_WABA_NUMBER);
+    console.log('Using WhatsApp number:', whatsappNumber);
+  }, []);
 
   useEffect(() => {
     if (user) {
