@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Mail, Lock, AlertCircle, Loader2, LogIn } from 'lucide-react';
+import { Mail, Lock, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -10,8 +10,8 @@ export default function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const from = (location.state as any)?.from?.pathname || '/shipment';
 
@@ -20,122 +20,130 @@ export default function Login() {
     setError('');
     setLoading(true);
 
-    const { error } = await signIn(email, password);
-
-    if (error) {
-      setError(error.message);
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        setError(error.message || 'Login failed');
+        setLoading(false);
+      } else {
+        navigate(from, { replace: true });
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Unexpected error');
       setLoading(false);
-    } else {
-      navigate(from, { replace: true });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-500 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 border border-white/30">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-white">Ozu Admin</h1>
-          <p className="text-white/70 mt-2">Sign in to manage deliveries</p>
-        </div>
+    <div className="min-h-screen bg-white flex justify-center px-4 font-[DM Sans]">
+      <div className="w-full max-w-[377px] pt-24">
 
-        {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Welcome back</h2>
+        {/* FIGMA HEADING */}
+        <h1
+          className="
+            text-[24px]
+            font-bold
+            leading-[120%]
+            tracking-[-0.02em]
+            text-[#111111]
+            text-center
+            mx-auto
+            w-[229px]
+            h-[58px]
+          "
+        >
+          Create Your Business Account
+        </h1>
+
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+
+          <Input
+            icon={<Mail />}
+            placeholder="you@company.com"
+            value={email}
+            onChange={setEmail}
+            type="email"
+          />
+
+          <Input
+            icon={<Lock />}
+            placeholder="Enter your password"
+            value={password}
+            onChange={setPassword}
+            type="password"
+          />
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
+            <p className="text-sm text-red-600">{error}</p>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@example.com"
-                  required
-                  className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors bg-gray-50"
-                />
-              </div>
-            </div>
+          {/* LOGIN BUTTON */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="
+              w-full
+              h-[57px]
+              rounded-full
+              bg-[#FFCA20]
+              text-black
+              font-semibold
+              flex
+              items-center
+              justify-center
+            "
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              'Login'
+            )}
+          </button>
+        </form>
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors bg-gray-50"
-                />
-              </div>
-              <div className="flex justify-end mt-2">
-                <Link
-                  to="/forgot-password"
-                  className="text-sm text-violet-600 hover:text-violet-700 font-medium"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold rounded-xl hover:from-violet-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-violet-500/30"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  <LogIn className="h-5 w-5" />
-                  Sign In
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Sign Up Link */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-violet-600 hover:text-violet-700 font-medium">
-                Sign up
-              </Link>
-            </p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <p className="text-center text-sm text-white/60 mt-8">
-          © 2025 Ozu Admin. All rights reserved.
+        {/* SIGNUP LINK */}
+        <p className="mt-6 text-center text-[14px] text-[#5F5F5F]">
+          Don't have an account?{' '}
+          <Link to="/signup" className="text-[#FFCA20] font-medium">
+            Sign up
+          </Link>
         </p>
       </div>
+    </div>
+  );
+}
+
+/* ===== INPUT COMPONENT ===== */
+function Input({
+  icon,
+  placeholder,
+  value,
+  onChange,
+  type = 'text',
+}: any) {
+  return (
+    <div className="relative">
+      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+        {icon}
+      </span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="
+          w-full
+          h-[58px]
+          pl-12
+          pr-4
+          rounded-xl
+          border
+          border-gray-200
+          text-[14px]
+        "
+        required
+      />
     </div>
   );
 }

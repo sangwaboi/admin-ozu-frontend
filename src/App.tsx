@@ -1,8 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+
+/* Shipment pages */
+
+/* Auth pages */
+import Welcome from './pages/Auth/Welcome';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
+
+/* App pages */
 import AdminPortal from '@/pages/AdminPortal';
 import AdminShipment from '@/pages/AdminShipment';
 import AllShipmentsMap from '@/pages/AllShipmentsMap';
@@ -16,19 +24,15 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<Login />} />
+          {/* ================= PUBLIC ROUTES ================= */}
+          <Route path="/" element={<Welcome />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
           
-          {/* Protected routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Navigate to="/shipment" replace />
-              </ProtectedRoute>
-            }
-          />
+
+          {/* ================= PROTECTED ROUTES ================= */}
+         
+
           <Route
             path="/shipment"
             element={
@@ -37,6 +41,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/profile"
             element={
@@ -45,6 +50,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/map"
             element={
@@ -53,6 +59,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/tracking"
             element={
@@ -61,6 +68,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/issues"
             element={
@@ -69,6 +77,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/riders"
             element={
@@ -77,6 +86,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/tenant-settings"
             element={
@@ -85,6 +95,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* ================= FALLBACK ================= */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
@@ -92,4 +105,3 @@ function App() {
 }
 
 export default App;
-

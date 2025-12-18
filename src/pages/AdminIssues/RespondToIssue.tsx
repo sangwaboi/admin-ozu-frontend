@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { ShipmentIssue } from '@/types/issue';
 import { IssuesAPI } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface RespondToIssueProps {
   issue: ShipmentIssue;
@@ -17,7 +15,7 @@ export default function RespondToIssue({ issue, onSuccess }: RespondToIssueProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!message.trim()) {
       setError('Please enter instructions for the rider');
       return;
@@ -31,7 +29,7 @@ export default function RespondToIssue({ issue, onSuccess }: RespondToIssueProps
         action,
         message: message.trim(),
       });
-      
+
       alert('Response sent to rider successfully!');
       setMessage('');
       onSuccess();
@@ -44,62 +42,47 @@ export default function RespondToIssue({ issue, onSuccess }: RespondToIssueProps
   };
 
   return (
-    <Card className="mt-4 border-blue-200 bg-blue-50">
-      <CardHeader>
-        <CardTitle className="text-lg">📝 Respond to Issue</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Action Required
-            </label>
-            <select
-              value={action}
-              onChange={(e) => setAction(e.target.value as 'redeliver' | 'return_to_shop')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="redeliver">🔄 Re-deliver to Customer</option>
-              <option value="return_to_shop">↩️ Return to Shop</option>
-            </select>
-          </div>
+    <form
+      onSubmit={handleSubmit}
+      className="mt-3 bg-[#F3F8FF] rounded-xl p-4 space-y-3 border"
+    >
+      {/* ACTION */}
+      <select
+        value={action}
+        onChange={(e) =>
+          setAction(e.target.value as 'redeliver' | 'return_to_shop')
+        }
+        className="w-full h-[44px] rounded-lg border px-3 text-sm focus:outline-none"
+      >
+        <option value="redeliver">🔄 Re-deliver to Customer</option>
+        <option value="return_to_shop">↩️ Return to Shop</option>
+      </select>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Instructions for Rider *
-            </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Enter detailed instructions for the rider..."
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Example: "Please try again after 2 PM. Customer will be available then."
-            </p>
-          </div>
+      {/* MESSAGE */}
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Instructions for rider"
+        rows={3}
+        className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
+        required
+      />
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
+      {/* ERROR */}
+      {error && (
+        <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+          {error}
+        </div>
+      )}
 
-          <div className="flex gap-3">
-            <Button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {loading ? 'Sending...' : '📤 Send Instructions'}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+      {/* SUBMIT */}
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full h-[42px] rounded-lg bg-[#2563EB] text-white font-semibold disabled:opacity-60"
+      >
+        {loading ? 'Sending…' : 'Send Instructions'}
+      </button>
+    </form>
   );
 }
-
-

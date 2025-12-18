@@ -11,19 +11,6 @@ interface IssueCardProps {
 export default function IssueCard({ issue, onUpdate }: IssueCardProps) {
   const [showRespondForm, setShowRespondForm] = useState(false);
 
-  const getStatusBadge = () => {
-    switch (issue.status) {
-      case 'reported':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">🟡 Waiting for Admin Response</span>;
-      case 'admin_responded':
-        return <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">🔵 Waiting for Rider</span>;
-      case 'resolved':
-        return <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">✅ Resolved</span>;
-      default:
-        return null;
-    }
-  };
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('en-IN', {
@@ -37,92 +24,92 @@ export default function IssueCard({ issue, onUpdate }: IssueCardProps) {
   };
 
   return (
-    <Card className={`mb-4 ${issue.status === 'resolved' ? 'bg-gray-50' : 'bg-white'}`}>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              ⚠️ Issue: {issue.issueType}
-            </h3>
-            <p className="text-sm text-gray-600">Shipment #{issue.shipmentId}</p>
-          </div>
-          {getStatusBadge()}
-        </div>
+    <Card className="rounded-2xl border bg-white">
+      <CardContent className="p-4 space-y-4">
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* HEADER */}
+        <div className="flex justify-between items-start">
           <div>
-            <p className="text-sm font-medium text-gray-700">🚴 Rider</p>
-            <p className="text-sm text-gray-900">{issue.riderName}</p>
-            <p className="text-sm text-gray-600">📞 {issue.riderMobile}</p>
+            <p className="text-sm font-semibold flex items-center gap-2">
+              <span className="w-2 h-2 bg-red-500 rounded-full" />
+              ⚠️ {issue.issueType}
+            </p>
+            <p className="text-xs text-gray-500">
+              Shipment #{issue.shipmentId}
+            </p>
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">👤 Customer</p>
-            <p className="text-sm text-gray-900">{issue.customerName}</p>
-            <p className="text-sm text-gray-600">📞 {issue.customerMobile}</p>
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <p className="text-sm font-medium text-gray-700">📍 Customer Address</p>
-          <p className="text-sm text-gray-600">{issue.customerAddress}</p>
-        </div>
-
-        <div className="mb-4">
-          <p className="text-xs text-gray-500">
-            📅 Reported: {formatDate(issue.reportedAt)}
+          <p className="text-xs text-gray-400">
+            {formatDate(issue.reportedAt)}
           </p>
         </div>
 
-        {/* Admin Response Section */}
+        {/* INFO */}
+        <div className="space-y-2 text-sm">
+          <InfoRow label="Rider" value={`${issue.riderName} • ${issue.riderMobile}`} />
+          <InfoRow label="Customer" value={issue.customerName} />
+          <InfoRow label="Address" value={issue.customerAddress} />
+        </div>
+
+        {/* STATUS */}
+        {issue.status === 'reported' && (
+          <div className="bg-[#FFF5E6] rounded-lg px-3 py-2 text-xs text-[#A46A00]">
+            Waiting for admin response
+          </div>
+        )}
+
+        {issue.status === 'admin_responded' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-700">
+            Waiting for rider action
+          </div>
+        )}
+
+        {issue.status === 'resolved' && (
+          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-700">
+            Issue resolved
+          </div>
+        )}
+
+        {/* ADMIN RESPONSE (unchanged logic, cleaner UI) */}
         {issue.adminResponse && issue.adminMessage && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <p className="text-sm font-medium text-blue-900 mb-2">
-              {issue.adminResponse === 'redeliver' ? '🔄 Admin Response: Re-deliver' : '↩️ Admin Response: Return to Shop'}
+          <div className="bg-gray-50 border rounded-lg p-3 text-xs text-gray-700">
+            <p className="font-medium mb-1">
+              Admin Response: {issue.adminResponse === 'redeliver' ? 'Re-deliver' : 'Return to Shop'}
             </p>
-            <p className="text-sm text-blue-800 mb-2">
-              💬 Message: "{issue.adminMessage}"
-            </p>
+            <p className="italic">“{issue.adminMessage}”</p>
             {issue.adminRespondedAt && (
-              <p className="text-xs text-blue-600">
-                📅 Sent: {formatDate(issue.adminRespondedAt)}
+              <p className="text-[11px] text-gray-400 mt-1">
+                {formatDate(issue.adminRespondedAt)}
               </p>
             )}
           </div>
         )}
 
-        {/* Rider Re-attempt Status */}
+        {/* RIDER REATTEMPT */}
         {issue.riderReattemptStatus && (
-          <div className={`border rounded-lg p-4 mb-4 ${
-            issue.riderReattemptStatus === 'completed' 
-              ? 'bg-green-50 border-green-200' 
-              : 'bg-red-50 border-red-200'
-          }`}>
-            <p className="text-sm font-medium mb-1">
-              {issue.riderReattemptStatus === 'completed' 
-                ? '✅ Rider Re-attempt: Completed' 
-                : '❌ Rider Re-attempt: Failed'}
-            </p>
-            {issue.riderReattemptAt && (
-              <p className="text-xs text-gray-600">
-                📅 {formatDate(issue.riderReattemptAt)}
-              </p>
-            )}
+          <div
+            className={`rounded-lg px-3 py-2 text-xs ${
+              issue.riderReattemptStatus === 'completed'
+                ? 'bg-green-50 text-green-700'
+                : 'bg-red-50 text-red-700'
+            }`}
+          >
+            {issue.riderReattemptStatus === 'completed'
+              ? 'Rider re-attempt completed'
+              : 'Rider re-attempt failed'}
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* CTA */}
         {issue.status === 'reported' && !showRespondForm && (
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowRespondForm(true)}
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
-            >
-              📝 Respond to Issue
-            </button>
-          </div>
+          <button
+            onClick={() => setShowRespondForm(true)}
+            className="w-full h-[44px] rounded-lg bg-[#FFCA28] font-semibold text-sm"
+          >
+            Respond to this Issue
+          </button>
         )}
 
-        {/* Respond Form */}
+        {/* RESPOND FORM */}
         {showRespondForm && issue.status === 'reported' && (
           <RespondToIssue
             issue={issue}
@@ -132,9 +119,17 @@ export default function IssueCard({ issue, onUpdate }: IssueCardProps) {
             }}
           />
         )}
+
       </CardContent>
     </Card>
   );
 }
 
-
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex gap-2 bg-gray-100 rounded-md px-3 py-2">
+      <span className="text-xs text-gray-500 w-[70px]">{label}</span>
+      <span className="text-xs text-gray-800">{value}</span>
+    </div>
+  );
+}

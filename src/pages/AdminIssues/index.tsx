@@ -3,32 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { ShipmentIssue } from '@/types/issue';
 import { IssuesAPI } from '@/lib/api';
 import IssueCard from './IssueCard';
-import { Button } from '@/components/ui/button';
+import { Home, Map, AlertTriangle, Bike, RotateCcw,ArrowLeft } from 'lucide-react';
 
 export default function AdminIssues() {
   const navigate = useNavigate();
   const [issues, setIssues] = useState<ShipmentIssue[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'reported' | 'admin_responded' | 'resolved'>('all');
+  const [filter, setFilter] =
+    useState<'all' | 'reported' | 'admin_responded' | 'resolved'>('all');
 
   const fetchIssues = async () => {
     try {
-      setError(null);
-      // Try to get all issues (including resolved)
       const data = await IssuesAPI.getAll();
-      console.log('Fetched issues:', data);
-      
-      // Ensure data is an array
-      if (Array.isArray(data)) {
-        setIssues(data);
-      } else {
-        console.error('Invalid data format:', data);
-        setIssues([]);
-      }
-    } catch (err) {
-      console.error('Failed to fetch issues:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch issues');
+      setIssues(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
     }
@@ -36,131 +23,175 @@ export default function AdminIssues() {
 
   useEffect(() => {
     fetchIssues();
-    
-    // Poll for updates every 10 seconds
     const interval = setInterval(fetchIssues, 10000);
-    
     return () => clearInterval(interval);
   }, []);
 
-  const filteredIssues = issues.filter(issue => {
-    if (filter === 'all') return true;
-    return issue.status === filter;
-  });
+  const filteredIssues = issues.filter(i =>
+    filter === 'all' ? true : i.status === filter
+  );
 
-  const getFilterCount = (status: 'reported' | 'admin_responded' | 'resolved') => {
-    return issues.filter(issue => issue.status === status).length;
-  };
+  const count = (s: ShipmentIssue['status']) =>
+    issues.filter(i => i.status === s).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => navigate('/shipment')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                ← Back
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">⚠️ Delivery Issues</h1>
-                <p className="text-sm text-gray-600">Manage and respond to delivery issues</p>
-              </div>
-            </div>
-            <button
-              onClick={fetchIssues}
-              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-            >
-              🔄 Refresh
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#F5F5F5] pb-28 font-[DM Sans]">
 
-      {/* Filter Tabs */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex gap-2 mb-6 overflow-x-auto">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-              filter === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            All Issues ({issues.length})
+      {/* ================= TOP BAR ================= */}
+      <header className="bg-white px-4 pt-4 pb-3 border-b">
+        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/shipment')}>
+            <ArrowLeft />
           </button>
+          <h1 className="text-[38px] font-semibold tracking-tight">
+          ozu
+        </h1>
+        </div>
+
           <button
-            onClick={() => setFilter('reported')}
-            className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-              filter === 'reported'
-                ? 'bg-yellow-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            onClick={() => navigate('/profile')}
+            className="w-10 h-10 rounded-full overflow-hidden border"
           >
-            🟡 Needs Response ({getFilterCount('reported')})
-          </button>
-          <button
-            onClick={() => setFilter('admin_responded')}
-            className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-              filter === 'admin_responded'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            🔵 Waiting for Rider ({getFilterCount('admin_responded')})
-          </button>
-          <button
-            onClick={() => setFilter('resolved')}
-            className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-              filter === 'resolved'
-                ? 'bg-green-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            ✅ Resolved ({getFilterCount('resolved')})
+            <img
+              src="/ava2.png"
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
           </button>
         </div>
 
-        {/* Content */}
-        {loading && issues.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Loading issues...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <p className="text-red-700 mb-4">{error}</p>
-            <Button onClick={fetchIssues} variant="outline">
-              Try Again
-            </Button>
-          </div>
-        ) : filteredIssues.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-            <div className="text-6xl mb-4">🎉</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {filter === 'all' ? 'No Issues Found' : `No ${filter.replace('_', ' ')} Issues`}
-            </h3>
-            <p className="text-gray-600">
-              {filter === 'reported' && 'All reported issues have been responded to.'}
-              {filter === 'admin_responded' && 'No issues waiting for rider action.'}
-              {filter === 'resolved' && 'No resolved issues yet.'}
-              {filter === 'all' && 'All deliveries are running smoothly!'}
+        <div className="mt-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Delivery Issues</h2>
+            <p className="text-sm text-gray-500">
+              Manage and respond to delivery issues
             </p>
           </div>
+
+          <button
+            onClick={fetchIssues}
+            className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
+      </header>
+
+      {/* ================= FILTER CARDS ================= */}
+      <div className="px-4 mt-4">
+        <div className="grid grid-cols-4 gap-2">
+          <FilterBox
+            label="All Issues"
+            value={issues.length}
+            active={filter === 'all'}
+            onClick={() => setFilter('all')}
+          />
+          <FilterBox
+            label="Need Response"
+            value={count('reported')}
+            color="red"
+            active={filter === 'reported'}
+            onClick={() => setFilter('reported')}
+          />
+          <FilterBox
+            label="Waiting for Rider"
+            value={count('admin_responded')}
+            color="green"
+            active={filter === 'admin_responded'}
+            onClick={() => setFilter('admin_responded')}
+          />
+          <FilterBox
+            label="Resolved"
+            value={count('resolved')}
+            color="blue"
+            active={filter === 'resolved'}
+            onClick={() => setFilter('resolved')}
+          />
+          
+        </div>
+      </div>
+
+      {/* ================= ISSUE LIST ================= */}
+      <div className="px-4 mt-4 space-y-4">
+        {loading ? (
+          <p className="text-center text-sm text-gray-500">
+            Loading issues…
+          </p>
         ) : (
-          <div>
-            {filteredIssues.map((issue) => (
-              <IssueCard key={issue.id} issue={issue} onUpdate={fetchIssues} />
-            ))}
-          </div>
+          filteredIssues.map(issue => (
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              onUpdate={fetchIssues}
+            />
+          ))
         )}
       </div>
+
+      {/* ================= BOTTOM NAV ================= */}
+      <nav className="fixed bottom-0 left-0 right-0 h-[76px] bg-white border-t flex justify-around items-center text-xs">
+        <button
+          onClick={() => navigate('/shipment')}
+          className="flex flex-col items-center"
+        >
+          <Home />
+          HOME
+        </button>
+
+        <button
+          className="flex flex-col items-center text-black font-semibold"
+        >
+          <AlertTriangle />
+          ISSUES
+        </button>
+
+        <button
+          onClick={() => navigate('/map')}
+          className="flex flex-col items-center"
+        >
+          <Map />
+          MAP
+        </button>
+
+        <button
+          onClick={() => navigate('/riders')}
+          className="flex flex-col items-center"
+        >
+          <Bike />
+          RIDERS
+        </button>
+      </nav>
     </div>
   );
 }
 
+/* ================= FILTER CARD ================= */
+
+function FilterBox({
+  label,
+  value,
+  active,
+  onClick,
+  color = 'gray',
+}: any) {
+  const colors: any = {
+    gray: 'bg-gray-200 text-gray-700',
+    red: 'bg-red-100 text-red-600',
+    green: 'bg-green-100 text-green-600',
+    blue: 'bg-blue-100 text-blue-600',
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-xl p-2 text-center border ${
+        active ? 'border-black' : 'border-transparent'
+      } ${colors[color]}`}
+    >
+      <div className="text-xl font-bold">{value}</div>
+      <div className="text-[11px] leading-tight">{label}</div>
+    </button>
+  );
+}

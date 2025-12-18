@@ -8,8 +8,9 @@ import AddressSelector from '../../components/AddressSelector';
 import ShipmentForm from './ShipmentForm';
 import LiveTrackingMap from './LiveTrackingMap';
 import RiderStatus from './RiderStatus';
-import { LogOut } from 'lucide-react';
-import { useIssues } from '../../hooks/useIssues';
+
+
+import { Home, Map, AlertTriangle, Bike } from 'lucide-react';
 
 export interface AdminLocation {
   latitude: number;
@@ -36,10 +37,10 @@ export interface ShipmentRequest {
 
 function AdminShipment() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user} = useAuth();
   const [selectedAddress, setSelectedAddress] = useState<AdminAddress | null>(null);
   const [adminMobile, setAdminMobile] = useState<string>('');
-  const [adminName, setAdminName] = useState<string>('');
+  const [, setAdminName] = useState<string>('');
   const [allShipments, setAllShipments] = useState<any[]>([]);
   const [completedShipments, setCompletedShipments] = useState<any[]>([]);
   const [activeShipmentIndex, setActiveShipmentIndex] = useState<number>(0);
@@ -47,13 +48,14 @@ function AdminShipment() {
   const [currentTab, setCurrentTab] = useState<'active' | 'completed'>('active');
   const [notifications, setNotifications] = useState<string[]>([]);
   const [shipmentIssues, setShipmentIssues] = useState<Record<string | number, number>>({});
-  
+  const [showBooking, setShowBooking] = useState(false);
   // Use refs to track state without causing re-renders in useEffect
   const allShipmentsRef = useRef<any[]>([]);
   const activeShipmentRef = useRef<any>(null);
   
+  
   // Fetch issue counts for badge
-  const { counts: issueCounts } = useIssues(true, 15000);
+  
 
   // Load admin profile from Supabase
   const loadAdminProfile = useCallback(async () => {
@@ -90,11 +92,7 @@ function AdminShipment() {
     }
   }, [user, loadAdminProfile]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
-
+  
   // Show notification - memoize to avoid recreation (defined before fetchActiveShipments)
   const showNotification = useCallback((message: string) => {
     setNotifications(prev => [...prev, message]);
@@ -336,8 +334,10 @@ function AdminShipment() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Toast Notifications */}
+    <div >
+   <div className="min-h-screen w-full bg-white pb-24 font-[DM Sans] overflow-x-hidden">
+
+    {/* Toast Notifications */}
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {notifications.map((notification, index) => (
           <div
@@ -352,117 +352,110 @@ function AdminShipment() {
         ))}
       </div>
 
+      {/* Header */}  
+     <header className="px-4 pt-4 flex items-center justify-between">
+        <h1 className="text-[38px] font-semibold tracking-tight">
+          ozu
+        </h1>
+        <button onClick={() => navigate('/profile')}>
+          <img
+            src="/ava2.png"
+            alt="Profile"
+            className="w-10 h-10 rounded-full border"
+          />
+        </button>
+      </header>
+
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-500">
+    <div className="bg-white text-black">
         <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white">Admin Shipment Portal</h1>
-              <p className="text-sm text-white/70 mt-1">
-                {adminName ? `Welcome, ${adminName}` : 'Create and manage delivery requests'}
-              </p>
-            </div>
-            {/* Navigation Pills */}
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm p-1 rounded-xl border border-white/20">
-              <button
-                onClick={() => navigate('/profile')}
-                className="px-4 py-2 text-white/80 rounded-lg hover:bg-white/20 flex items-center gap-2 font-medium transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Profile
-              </button>
-              <button
-                onClick={() => navigate('/issues')}
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-all relative ${
-                  issueCounts.pending > 0
-                    ? 'bg-white text-red-600'
-                    : 'text-white/80 hover:bg-white/20'
-                }`}
-                title={issueCounts.pending > 0 ? `${issueCounts.pending} issue(s) need attention` : 'View issues'}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Issues
-                {issueCounts.pending > 0 && (
-                  <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {issueCounts.pending}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => navigate('/riders')}
-                className="px-4 py-2 text-white/80 rounded-lg hover:bg-white/20 flex items-center gap-2 font-medium transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Riders
-              </button>
-              <button
-                onClick={() => navigate('/map')}
-                disabled={!adminMobile || !selectedAddress}
-                className="px-4 py-2 bg-white text-violet-600 rounded-lg hover:bg-white/90 disabled:bg-white/30 disabled:text-white/50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-                Map
-              </button>
-              <button
-                onClick={handleSignOut}
-                className="px-4 py-2 text-white/80 rounded-lg hover:bg-white/20 flex items-center gap-2 font-medium transition-all"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </button>
-            </div>
-          </div>
+        
 
-          {/* Admin Location & Mobile */}
-          <div className="mt-5 bg-white rounded-2xl p-5 shadow-lg">
-            {/* Address Selector */}
-            <AddressSelector
-              selectedAddress={selectedAddress}
-              onAddressChange={setSelectedAddress}
-            />
+        {/* ===== PICKUP / DROP / BOOK ===== */}
+      <div className="px-4 mt-4 space-y-3">
 
-            {/* Admin Mobile Number */}
-            <div className="pt-4 mt-4 border-t border-gray-100">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Mobile Number (Shared with rider) <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="tel"
-                value={adminMobile}
-                onChange={(e) => setAdminMobile(e.target.value)}
-                placeholder="+91 XXXXX XXXXX"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
-                readOnly
-              />
-              <p className="text-xs text-gray-400 mt-2">
-                Update in <button onClick={() => navigate('/profile')} className="text-violet-600 hover:text-violet-700 font-medium">Profile Settings</button>
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Pickup */}
+        <AddressSelector
+          selectedAddress={selectedAddress}
+          onAddressChange={setSelectedAddress}
+        />
+
+        {/* Drop Location */}
+        <button
+          onClick={() => setShowBooking(true)}
+          className="h-[56px] w-full border rounded-xl px-3 flex items-center gap-3 text-sm text-gray-500 hover:bg-gray-50"
+        >
+          <span className="w-3 h-3 rounded-full bg-red-500" />
+          Enter Drop Location and Details
+        </button>
+
+        {/* Book Now */}
+        <button
+          onClick={() => setShowBooking(true)}
+          className="w-full h-[52px] rounded-xl bg-[#FFCA28] font-semibold"
+        >
+          Book Now
+        </button>
+      </div>
+         
+</div>
+      </div>
+        {/* ===== QUICK ACTIONS ===== */}
+      <div className="px-4 mt-6 grid grid-cols-3 gap-3 text-center text-[11px]">
+
+        <button
+          onClick={() => navigate('/profile')}
+          className="bg-gray-50 rounded-xl p-3"
+        >
+          <img
+            src="/undraw_delivery-address_409g.svg"
+            className="mx-auto h-16"
+          />
+          <p className="mt-2">Add / Update Pickup Point</p>
+        </button>
+
+        <button
+          onClick={() => navigate('/profile')}
+          className="bg-gray-50 rounded-xl p-3"
+        >
+          <img
+            src="/undraw_mobile-app_qxev.svg"
+            className="mx-auto h-16"
+          />
+          <p className="mt-2">Update Contact Number</p>
+        </button>
+
+        <button
+          onClick={() => navigate('/issues')}
+          className="bg-gray-50 rounded-xl p-3"
+        >
+          <img
+            src="/undraw_questions_g2px.svg"
+            className="mx-auto h-16"
+          />
+          <p className="mt-2">Check Delivery Issues</p>
+        </button>
       </div>
 
+
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <div className="max-w-screen-xl mx-auto px-2 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left: Shipment Form */}
-          <div>
-            <ShipmentForm
-              onSubmit={handleShipmentCreate}
-              disabled={!selectedAddress || !adminMobile}
-            />
-          </div>
+         {/* ===== BOOKING MODAL ===== */}
+{showBooking && (
+  <ShipmentForm
+    onSubmit={handleShipmentCreate}
+    disabled={!selectedAddress || !adminMobile}
+    onClose={() => setShowBooking(false)} // ✅ added
+  />
+)}
 
           {/* Right: Tracking & Status */}
-          <div className="space-y-6">
+         {/* Right: Tracking & Status */}
+<div className="space-y-6 lg:col-span-2 w-full">
+  
+
             {/* Shipments Card */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
               {/* Tab Headers */}
@@ -626,6 +619,48 @@ function AdminShipment() {
                 </div>
               )}
             </div>
+        {/* ===== ILLUSTRATION ===== */}
+  <div className="mt-6 relative overflow-hidden">
+  <p className="text-center text-xs text-gray-400 mb-2 relative z-10">
+    Made with ❤️ in India
+  </p>
+
+
+</div>
+
+      
+    
+        {/* ===== BOTTOM NAV ===== */}
+      <nav className="fixed bottom-0 left-0 right-0 h-[76px] bg-white border-t flex justify-around items-center text-xs">
+        <button
+          onClick={() => navigate('/shipment')}
+          className="flex flex-col items-center"
+        >
+          <Home />
+          HOME
+        </button>
+        <button
+          onClick={() => navigate('/issues')}
+          className="flex flex-col items-center"
+        >
+          <AlertTriangle />
+          ISSUES
+        </button>
+        <button
+          onClick={() => navigate('/map')}
+          className="flex flex-col items-center"
+        >
+          <Map />
+          MAP
+        </button>
+        <button
+          onClick={() => navigate('/riders')}
+          className="flex flex-col items-center"
+        >
+          <Bike />
+          RIDERS
+        </button>
+      </nav>
 
             {/* Active Shipment Details - Only show on Active tab */}
             {currentTab === 'active' && activeShipment && (
@@ -645,12 +680,41 @@ function AdminShipment() {
                   shipment={activeShipment}
                 />
               </>
+
+
+
             )}
+         
           </div>
         </div>
       </div>
     </div>
-  );
+    
+
+
+
+
+{/* ===== FOOTER IMAGE (EXACT SIZE MATCH) ===== */}
+
+
+  <img
+    src="/7606758_3700324.jpg"
+    alt="Delivery"
+    className="w-full opacity-20"
+  />
+</div>
+
+
+
+
+
+
+
+
+
+
+
+ );
 }
 
 export default AdminShipment;

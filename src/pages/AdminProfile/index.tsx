@@ -3,7 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import AddressManager from '../../components/AddressManager';
-import { ArrowLeft, Save, CheckCircle, AlertCircle, LogOut, QrCode } from 'lucide-react';
+import Lottie from 'lottie-react';
+import riderAnimation from '@/assets/loader-rider.json';
+
+import {
+  ArrowLeft,
+  CheckCircle,
+  AlertCircle,
+  LogOut,
+  QrCode,
+} from 'lucide-react';
 
 interface AdminProfile {
   mobile: string;
@@ -14,68 +23,60 @@ interface AdminProfile {
 export default function AdminProfile() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
+
   const [profile, setProfile] = useState<AdminProfile>({
     mobile: user?.user_metadata?.mobile || '',
     name: user?.user_metadata?.name || '',
     shopName: '',
   });
 
-  // Load existing profile
+  /* ================= LOAD PROFILE (UNCHANGED) ================= */
+
   useEffect(() => {
-    if (user) {
-      loadProfile();
-    }
+    if (user) loadProfile();
   }, [user]);
 
   const loadProfile = async () => {
     if (!user) return;
-    
     setIsLoading(true);
 
     try {
-      // Fetch profile from Supabase
       const { data, error } = await supabase
         .from('admin_profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Profile doesn't exist yet
-          setProfile({
-            mobile: user.user_metadata?.mobile || '',
-            name: user.user_metadata?.name || '',
-            shopName: '',
-          });
-        } else {
-          console.error('Error loading profile:', error);
-          setMessage({ type: 'error', text: 'Failed to load profile' });
-        }
-      } else if (data) {
-        // Profile exists
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (data) {
         setProfile({
           mobile: data.mobile,
           name: data.name,
           shopName: data.shop_name || '',
         });
       }
-    } catch (error) {
-      console.error('Error loading profile:', error);
+    } catch {
       setMessage({ type: 'error', text: 'Failed to load profile' });
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
+
+  /* ================= SAVE (UNCHANGED) ================= */
 
   const handleSave = async () => {
     if (!user) return;
 
-    // Validation
     if (!profile.name) {
       setMessage({ type: 'error', text: 'Your name is required' });
       return;
@@ -90,31 +91,27 @@ export default function AdminProfile() {
     setMessage(null);
 
     try {
-      // Prepare profile data for Supabase
-      const profileData = {
-        user_id: user.id,
-        mobile: profile.mobile,
-        name: profile.name,
-        shop_name: profile.shopName || null,
-      };
+      const { error } = await supabase.from('admin_profiles').upsert(
+        {
+          user_id: user.id,
+          mobile: profile.mobile,
+          name: profile.name,
+          shop_name: profile.shopName || null,
+        },
+        { onConflict: 'user_id' }
+      );
 
-      // Upsert to Supabase (insert or update)
-      const { error } = await supabase
-        .from('admin_profiles')
-        .upsert(profileData, {
-          onConflict: 'user_id',
-        });
+      if (error) throw error;
 
-      if (error) {
-        throw error;
-      }
-
-      setMessage({ type: 'success', text: '✅ Profile saved successfully!' });
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      setMessage({ 
-        type: 'error', 
-        text: 'Failed to save profile. Please try again.'
+      setMessage({
+        type: 'success',
+        text: '✅ Profile saved successfully!',
+      });
+      setIsEditOpen(false);
+    } catch {
+      setMessage({
+        type: 'error',
+        text: 'Failed to save profile. Please try again.',
       });
     } finally {
       setIsSaving(false);
@@ -126,198 +123,193 @@ export default function AdminProfile() {
     navigate('/login');
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
-
+  function RiderLoading() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/shipment')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Profile</h1>
-                <p className="text-sm text-gray-500 mt-1">Set up your shop details and default location</p>
-              </div>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 font-medium"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Message Alert */}
-      {message && (
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div
-            className={`flex items-center gap-3 p-4 rounded-lg ${
-              message.type === 'success'
-                ? 'bg-green-50 border border-green-200 text-green-800'
-                : 'bg-red-50 border border-red-200 text-red-800'
-            }`}
-          >
-            {message.type === 'success' ? (
-              <CheckCircle className="h-5 w-5 flex-shrink-0" />
-            ) : (
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
-            )}
-            <span className="font-medium">{message.text}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Form */}
-      <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-sm border p-6 space-y-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
-            
-            {/* Email (Read-only) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                value={user?.email || ''}
-                disabled
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-500 mt-1">Your login email</p>
-            </div>
-
-            {/* Mobile Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mobile Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                value={profile.mobile}
-                onChange={(e) => setProfile({ ...profile, mobile: e.target.value })}
-                placeholder="+91 XXXXX XXXXX"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-gray-500 mt-1">Shared with riders</p>
-            </div>
-
-            {/* Your Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Your Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={profile.name}
-                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                placeholder="John Doe"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Shop Name (Optional) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Shop/Business Name
-              </label>
-              <input
-                type="text"
-                value={profile.shopName || ''}
-                onChange={(e) => setProfile({ ...profile, shopName: e.target.value })}
-                placeholder="ABC Store"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-gray-500 mt-1">Optional - for your reference</p>
-            </div>
-          </div>
-
-          {/* Tenant Settings Section */}
-          <div className="border-t pt-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Shop Join Code</h2>
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-blue-900 font-medium mb-1">
-                    Share your join code with riders
-                  </p>
-                  <p className="text-xs text-blue-700">
-                    Riders can join your shop by sending a WhatsApp message with your unique code.
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate('/tenant-settings')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 font-medium transition-colors whitespace-nowrap"
-                >
-                  <QrCode className="h-4 w-4" />
-                  View Join Code
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Address Management Section */}
-          <div className="border-t pt-6">
-            <AddressManager />
-            
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-900">
-                💡 <strong>Tip:</strong> Add multiple addresses (shop, warehouse, home office, etc.). 
-                You can choose which one to use when creating shipments.
-              </p>
-            </div>
-          </div>
-
-          {/* Save Button */}
-          <div className="border-t pt-6 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => navigate('/shipment')}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  Save Profile
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="loading-screen">
+      <Lottie
+        animationData={riderAnimation}
+        loop
+        style={{ width: 180, height: 180 }}
+      />
+      <p className="loading-text">Loading riders…</p>
     </div>
   );
 }
 
+  if (isLoading) {
+    return <RiderLoading />;
+  }
+
+
+  return (
+    <div className="min-h-screen bg-white font-[DM Sans]">
+
+      {/* ================= HEADER ================= */}
+      <div className="px-4 pt-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/shipment')}>
+            <ArrowLeft />
+          </button>
+          <h1 className="text-[38px] font-semibold tracking-tight">
+          ozu
+        </h1>
+        </div>
+
+    
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-2 text-sm border px-3 py-1.5 rounded"
+        >
+          <LogOut size={16} />
+          Sign Out
+        </button>
+      </div>
+
+      {/* ================= PROFILE ================= */}
+      <div className="px-4 mt-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <img
+            src="/ava2.png"
+            alt="Avatar"
+            className="w-[64px] h-[64px] rounded-full"
+          />
+          <div>
+            <p className="text-[16px] font-semibold text-black">
+              {profile.name}
+            </p>
+            <p className="text-[12px] text-gray-500">
+              Joined : 15 Dec 2025
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setIsEditOpen(true)}
+          className="px-3 py-1 border rounded-md text-[13px]"
+        >
+          Edit
+        </button>
+      </div>
+
+      {/* ================= MESSAGE ================= */}
+      {message && (
+        <div className="px-4 mt-4">
+          <div
+            className={`flex items-center gap-2 p-3 rounded ${
+              message.type === 'success'
+                ? 'bg-green-50 text-green-800'
+                : 'bg-red-50 text-red-800'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <CheckCircle size={18} />
+            ) : (
+              <AlertCircle size={18} />
+            )}
+            {message.text}
+          </div>
+        </div>
+      )}
+
+      {/* ================= INVITE RIDERS CARD ================= */}
+      <div className="mx-auto mt-5 w-full max-w-[409px] rounded-[16px] border border-[#E3E3E3] bg-[#EFEFEF] px-4 py-5 text-center">
+        <p className="text-[16px] font-semibold text-black">
+          Invite Riders to your shop
+        </p>
+        <p className="mt-1 text-[13px] text-gray-600">
+          Sent this unique QR code to rider
+        </p>
+
+        <button
+          onClick={() => navigate('/tenant-settings')}
+          className="mx-auto mt-4 flex h-[60px] w-full max-w-[301px] items-center justify-center rounded-full border border-[#FFDBD8] bg-[#FFCA28] font-semibold text-black"
+        >
+          <QrCode className="mr-2 h-4 w-4" />
+          View Join Code
+        </button>
+      </div>
+
+      {/* ================= ADDRESS MANAGER ================= */}
+      <div className="mx-auto mt-4 w-full max-w-[410px] px-4">
+        <AddressManager />
+      </div>
+       {/* FOOTER TEXT */}
+        <div className="mt-6 flex justify-center">
+          <p className="text-[12px] text-gray-500">
+            Made with <span className="text-red-500">❤️</span> in India
+          </p>
+        </div>
+
+      {/* ================= FOOTER IMAGE ================= */}
+      <img
+        src="/7606758_3700324.jpg"
+        alt="Delivery"
+        className="mt-6 w-full opacity-20"
+      />
+
+      {/* ================= EDIT PROFILE POPUP ================= */}
+      {isEditOpen && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-40" />
+
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="w-full max-w-[440px] h-[521px] bg-white rounded-[20px] p-6">
+
+              <h2 className="text-center font-semibold text-[16px] mb-5">
+                Basic Information
+              </h2>
+
+              <input
+                className="w-full h-[52px] border rounded-xl px-4 mb-4"
+                placeholder="Your Name"
+                value={profile.name}
+                onChange={e =>
+                  setProfile({ ...profile, name: e.target.value })
+                }
+              />
+
+              <input
+                className="w-full h-[52px] border rounded-xl px-4 mb-4"
+                placeholder="+91 Phone Number"
+                value={profile.mobile}
+                onChange={e =>
+                  setProfile({ ...profile, mobile: e.target.value })
+                }
+              />
+
+              <input
+                className="w-full h-[52px] border rounded-xl px-4 mb-4 bg-gray-100"
+                value={user?.email || ''}
+                disabled
+              />
+
+              <input
+                className="w-full h-[52px] border rounded-xl px-4 mb-6"
+                placeholder="Store Name (Optional)"
+                value={profile.shopName || ''}
+                onChange={e =>
+                  setProfile({ ...profile, shopName: e.target.value })
+                }
+              />
+
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="w-full h-[52px] bg-[#FFCA28] rounded-full font-semibold"
+              >
+                {isSaving ? 'Saving…' : 'Done'}
+              </button>
+
+              <button
+                onClick={() => setIsEditOpen(false)}
+                className="w-full mt-3 text-[14px] text-gray-500"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

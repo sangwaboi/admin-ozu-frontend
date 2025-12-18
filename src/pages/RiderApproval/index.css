@@ -1,430 +1,267 @@
-/* =========================================================================
-   RIDERS APPROVAL PAGE STYLES
-   ========================================================================= */
+/* ================= BASE ================= */
 
-.riders-approval-page {
-  padding: 20px;
-  max-width: 1400px;
+.mobile-ui {
+  max-width: 520px;
   margin: 0 auto;
+  padding: 16px;
+  background: #fff;
+  font-family: 'DM Sans', sans-serif;
 }
 
-/* Page Header */
-.page-header {
-  margin-bottom: 30px;
-}
+/* ================= HEADER ================= */
 
-.page-header .header-content {
+.mobile-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  padding: 12px 16px;
 }
 
-.page-header .back-button {
+.header-left {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  background: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  color: #333;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
 }
 
-.page-header .back-button:hover {
-  background: #e8e8e8;
-  border-color: #d0d0d0;
-}
-
-.page-header .back-button svg {
-  width: 20px;
-  height: 20px;
-}
-
-.page-header h1 {
-  font-size: 28px;
-  margin: 0 0 10px 0;
-  color: #333;
-}
-
-.page-header p {
-  color: #666;
-  margin: 0;
-}
-
-/* Tabs */
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.tab {
-  padding: 12px 24px;
+.back-btn {
   background: none;
   border: none;
-  border-bottom: 3px solid transparent;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  color: #666;
-  transition: all 0.2s;
+  padding: 4px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  cursor: pointer;
 }
 
-.tab:hover {
-  color: #333;
-  background: #f5f5f5;
+.back-btn svg {
+  display: block;
 }
 
-.tab.active {
-  color: #2196F3;
-  border-bottom-color: #2196F3;
+.logo-text {
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
-.tab .badge {
-  background: #ff5722;
-  color: white;
-  padding: 2px 8px;
+.profile-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: none;
+  background: none;
+}
+
+.profile-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ================= TITLE ================= */
+
+.page-title {
+  margin-top: 12px;
+}
+
+.page-title h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.page-title p {
+  font-size: 14px;
+  color: #5f5f5f;
+}
+
+/* ================= TABS ================= */
+
+.pill-tabs {
+  display: flex;
+  margin-top: 16px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
 }
 
-.tab .badge.approved {
-  background: #4CAF50;
+.pill {
+  flex: 1;
+  height: 44px;
+  border: none;
+  background: #fff;
+  color: #6b7280;
+  font-weight: 500;
 }
 
-/* Tab Content */
-.tab-content {
-  min-height: 400px;
+.pill.active {
+  background: #000;
+  color: #fff;
 }
 
-/* Riders Grid */
-.riders-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+/* ================= LIST ================= */
+
+.mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Rider Card */
+/* ================= RIDER CARD ================= */
+
 .rider-card {
-  background: white;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: all 0.2s;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+  background: #fff;
 }
 
-.rider-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.rider-card.pending {
-  border-left: 4px solid #FFA500;
-}
-
-.rider-card.approved {
-  border-left: 4px solid #4CAF50;
-}
-
-/* Rider Header */
 .rider-header {
   display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  margin-bottom: 15px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+  gap: 12px;
 }
 
 .rider-avatar {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #a3e635;
+  color: #14532d;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.rider-avatar.approved {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-}
-
-.rider-info {
-  flex: 1;
 }
 
 .rider-info h3 {
-  margin: 0 0 5px 0;
-  font-size: 18px;
-  color: #333;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .rider-info .contact {
-  margin: 0;
-  color: #666;
-  font-size: 14px;
+  font-size: 12px;
+  color: #6b7280;
 }
 
 .rider-info .wa-id {
-  margin: 5px 0 0 0;
-  color: #25D366;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  color: #9ca3af;
 }
 
-.status-badge {
-  margin-left: auto;
-}
+/* ================= DETAILS ================= */
 
-.status-badge span {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.status-badge .available {
-  background: #e8f5e9;
-  color: #4CAF50;
-}
-
-.status-badge .unavailable {
-  background: #ffebee;
-  color: #f44336;
-}
-
-/* Rider Details */
-.rider-details {
-  margin: 15px 0;
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f5f5f5;
-  font-size: 14px;
-}
-
-.detail-row:last-child {
+.rider-details .detail-row {
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 8px;
   border-bottom: none;
+  font-size: 13px;
 }
 
 .detail-row .label {
-  color: #666;
+  color: #6b7280;
+}
+
+/* ================= ACTION BUTTONS ================= */
+
+.rider-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-approve,
+.btn-remove {
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* Secondary actions */
+
+.btn-edit {
+  height: 40px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: #111827;
   font-weight: 500;
 }
 
-.detail-row .value {
-  color: #333;
-}
-
-/* Rider Actions */
-.rider-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 15px;
-}
-
-.rider-actions button {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.rider-actions button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-approve {
-  background: #4CAF50;
-  color: white;
-}
-
-.btn-approve:hover {
-  background: #45a049;
-}
-
-.btn-edit {
-  background: #2196F3;
-  color: white;
-}
-
-.btn-edit:hover {
-  background: #1976D2;
-}
-
 .btn-reject {
-  background: #f44336;
-  color: white;
+  height: 40px;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 500;
 }
 
-.btn-reject:hover {
-  background: #d32f2f;
-}
-
-.btn-remove {
-  background: #ff5722;
-  color: white;
-  width: 100%;
-}
-
-.btn-remove:hover {
-  background: #e64a19;
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background: #f5f5f5;
-  border-radius: 12px;
-}
-
-.empty-state p {
-  margin: 0 0 10px 0;
-  font-size: 18px;
-  color: #333;
-}
-
-.empty-state small {
-  color: #666;
-  font-size: 14px;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
+/* ================= MODAL ================= */
 
 .modal-content {
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  border-radius: 16px;
+  padding: 20px;
 }
 
-.modal-content h2 {
-  margin: 0 0 20px 0;
-  font-size: 22px;
-  color: #333;
+/* ================= EMPTY ================= */
+
+.empty-state {
+  background: transparent;
+  padding: 40px 20px;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
+/* ================= DESKTOP ================= */
 
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #666;
-  font-size: 14px;
+@media (min-width: 768px) {
+  .mobile-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
 }
+/* ================= LOADING SCREEN ================= */
 
-.name-input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 16px;
-}
-
-.name-input:focus {
-  outline: none;
-  border-color: #2196F3;
-}
-
-.modal-actions {
+.loading-screen {
+  min-height: 100vh;
+  background: #ffffff;
   display: flex;
-  gap: 10px;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.modal-actions button {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+.road {
+  width: 80%;
+  max-width: 320px;
+  height: 60px;
+  position: relative;
+  overflow: hidden;
 }
 
-.cancel-btn {
-  background: #f5f5f5;
-  color: #333;
+.rider {
+  position: absolute;
+  left: -40px;
+  font-size: 32px;
+  animation: ride 1.8s linear infinite;
 }
 
-.cancel-btn:hover {
-  background: #e0e0e0;
-}
-
-.approve-btn {
-  background: #4CAF50;
-  color: white;
-}
-
-.approve-btn:hover {
-  background: #45a049;
-}
-
-/* Loading State */
-.loading {
-  text-align: center;
-  padding: 60px 20px;
-  font-size: 18px;
-  color: #666;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .riders-grid {
-    grid-template-columns: 1fr;
+@keyframes ride {
+  0% {
+    left: -40px;
   }
-  
-  .rider-actions {
-    flex-direction: column;
-  }
-  
-  .rider-actions button {
-    width: 100%;
-  }
-  
-  .tabs {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  100% {
+    left: 100%;
   }
 }
 
+.loading-text {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}

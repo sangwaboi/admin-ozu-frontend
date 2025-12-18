@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { RidersAPI } from '@/lib/api';
 import type { PendingRider, ApprovedRider } from '@/types/riderApproval';
 import './index.css';
-
+import {ArrowLeft,} from 'lucide-react';
+import Lottie from 'lottie-react';
+import riderAnimation from '@/assets/loader-rider.json';
+import { Home, Map, AlertTriangle, Bike } from 'lucide-react';
 export default function RiderApprovalPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'pending' | 'approved'>('pending');
@@ -120,60 +123,71 @@ export default function RiderApprovalPage() {
       });
     }
   };
+ function RiderLoading() {
+  return (
+    <div className="loading-screen">
+      <Lottie
+        animationData={riderAnimation}
+        loop
+        style={{ width: 180, height: 180 }}
+      />
+      <p className="loading-text">Riders on the way…</p>
+    </div>
+  );
+}
 
   if (loading) {
-    return (
-      <div className="riders-approval-page">
-        <div className="loading">
-          <svg className="animate-spin h-12 w-12 text-blue-600 mx-auto" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-          <p className="mt-4">Loading riders...</p>
-        </div>
-      </div>
-    );
+    return <RiderLoading />;
   }
 
   return (
-    <div className="riders-approval-page">
-      <div className="page-header">
-        <div className="header-content">
-          <button
-            onClick={() => navigate('/shipment')}
-            className="back-button"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back
+    <div className="riders-approval-page ">
+   <header className="px-4 pt-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/shipment')}>
+            <ArrowLeft />
           </button>
-          <div>
-            <h1>🏍️ Riders Management</h1>
-            <p>Approve or reject delivery riders</p>
-          </div>
+          <h1 className="text-[38px] font-semibold">ozu</h1>
         </div>
-      </div>
+
+
+  <button
+    type="button"
+    onClick={() => navigate('/profile')}
+    className="profile-btn"
+  >
+   <img
+            src="/ava2.png"
+            alt="Profile"
+            className="w-10 h-10 rounded-full border"
+          />
+  </button>
+</header>
+
+
+
+
+
+
+
+
+
 
       {/* Tabs */}
-      <div className="tabs">
-        <button
-          className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
-          onClick={() => setActiveTab('pending')}
-        >
-          ⏳ Pending Approval
-          {pendingRiders.length > 0 && (
-            <span className="badge">{pendingRiders.length}</span>
-          )}
-        </button>
-        <button
-          className={`tab ${activeTab === 'approved' ? 'active' : ''}`}
-          onClick={() => setActiveTab('approved')}
-        >
-          ✅ Approved Riders
-          <span className="badge approved">{approvedRiders.length}</span>
-        </button>
-      </div>
+   <div className="pill-tabs">
+  <button
+    onClick={() => setActiveTab('pending')}
+    className={activeTab === 'pending' ? 'pill active' : 'pill'}
+  >
+    Pending Approval
+  </button>
+  <button
+    onClick={() => setActiveTab('approved')}
+    className={activeTab === 'approved' ? 'pill active' : 'pill'}
+  >
+    Approved Rider
+  </button>
+</div>
 
       {/* Tab Content */}
       <div className="tab-content">
@@ -195,6 +209,40 @@ export default function RiderApprovalPage() {
           />
         )}
       </div>
+       {/* ================= BOTTOM NAV ================= */}
+      <nav className="fixed bottom-0 left-0 right-0 h-[76px] bg-white border-t flex justify-around items-center text-xs">
+        <button
+          onClick={() => navigate('/shipment')}
+          className="flex flex-col items-center"
+        >
+          <Home />
+          HOME
+        </button>
+
+        <button
+         onClick={() => navigate('/issues')}
+          className="flex flex-col items-center"
+        >
+          <AlertTriangle />
+          ISSUES
+        </button  >
+
+        <button
+          onClick={() => navigate('/map')}
+          className="flex flex-col items-center"
+        >
+          <Map />
+          MAP
+        </button>
+
+        <button
+          onClick={() => navigate('/riders')}
+         className="flex flex-col items-center text-black font-semibold"
+        >
+          <Bike />
+          RIDERS
+        </button>
+      </nav>
 
       {/* Edit Name Modal */}
       {showEditModal && selectedRider && (
@@ -223,6 +271,7 @@ export default function RiderApprovalPage() {
         </div>
       )}
     </div>
+    
   );
 }
 
@@ -241,14 +290,15 @@ function PendingRidersTab({ riders, onApprove, onApproveWithEdit, onReject, proc
   if (riders.length === 0) {
     return (
       <div className="empty-state">
-        <p>✅ No pending riders</p>
+        <p> No pending riders</p>
         <small>New riders who send "hi" on WhatsApp will appear here</small>
       </div>
     );
   }
 
   return (
-    <div className="riders-grid">
+    <div className="mobile-list">
+
       {riders.map(rider => (
         <div key={rider.id} className="rider-card pending">
           <div className="rider-header">
@@ -406,4 +456,3 @@ function ApprovedRidersTab({ riders, onRemove, processingRiders }: ApprovedRider
     </div>
   );
 }
-

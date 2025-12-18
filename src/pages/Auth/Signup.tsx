@@ -1,7 +1,18 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Mail, Lock, AlertCircle, Loader2, UserPlus, User, Phone, Store } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  AlertCircle,
+  Loader2,
+  UserPlus,
+  User,
+  Phone,
+  Store,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -15,243 +26,223 @@ export default function Signup() {
     password: '',
     confirmPassword: '',
   });
+
+  const [agree, setAgree] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setError('');
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      setError('Name is required');
-      return false;
-    }
-    if (!formData.email.trim()) {
-      setError('Email is required');
-      return false;
-    }
-    if (!formData.mobile.trim()) {
-      setError('Mobile number is required');
-      return false;
-    }
-    if (!/^[6-9]\d{9}$/.test(formData.mobile.replace(/\s+/g, ''))) {
-      setError('Enter valid 10-digit mobile number');
-      return false;
-    }
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return false;
-    }
+    if (!formData.name.trim()) return setError('Name is required'), false;
+    if (!formData.email.trim()) return setError('Email is required'), false;
+    if (!formData.mobile.trim()) return setError('Mobile number is required'), false;
+    if (!/^[6-9]\d{9}$/.test(formData.mobile.replace(/\s+/g, '')))
+      return setError('Enter valid 10-digit mobile number'), false;
+    if (formData.password.length < 6)
+      return setError('Password must be at least 6 characters'), false;
+    if (formData.password !== formData.confirmPassword)
+      return setError('Passwords do not match'), false;
+    if (!agree)
+      return setError('Please agree to the Terms and Privacy Policy'), false;
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
     if (!validateForm()) return;
 
     setLoading(true);
+    try {
+      const { error } = await signUp(
+        formData.email,
+        formData.password,
+        formData.mobile,
+        formData.name,
+        formData.shopName || undefined
+      );
 
-    const { error } = await signUp(
-      formData.email,
-      formData.password,
-      formData.mobile,
-      formData.name,
-      formData.shopName || undefined
-    );
-
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message || 'Signup failed');
+      } else {
+        alert('✅ Account created successfully! Please check your email.');
+        navigate('/login');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Unexpected error');
+    } finally {
       setLoading(false);
-    } else {
-      // Show success message
-      alert('✅ Account created successfully! Please check your email to verify your account.');
-      navigate('/login');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Ozu Admin</h1>
-          <p className="text-gray-600 mt-2">Create your account</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#F9FAFB] to-white px-4 font-['DM Sans']">
+      <div className="max-w-md mx-auto flex flex-col items-center pt-20">
 
-        {/* Signup Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Get started</h2>
+        {/* Illustration */}
+        <img
+          src="/hands_2.png"
+          alt="Welcome"
+          className="w-[77px] h-[138px] object-contain mb-6"
+        />
+
+        {/* Heading */}
+        <h1 className="text-[24px] font-bold text-[#111111] text-center">
+          Welcome to OZU
+        </h1>
+        <p className="text-[20px] font-semibold text-[#5F5F5F] text-center mt-2">
+          Connect Your Store
+          <br />
+          Get control on your deliveries
+        </p>
+
+        <form onSubmit={handleSubmit} className="w-full mt-10 space-y-3">
+
+          <Input
+            icon={<Phone size={18} />}
+            placeholder="+91 98765 43210"
+            value={formData.mobile}
+            onChange={v => handleChange('mobile', v)}
+          />
+
+          <Input
+            icon={<Store size={18} />}
+            placeholder="ABC Store"
+            value={formData.shopName}
+            onChange={v => handleChange('shopName', v)}
+          />
+
+          <Input
+            icon={<User size={18} />}
+            placeholder="Full name"
+            value={formData.name}
+            onChange={v => handleChange('name', v)}
+          />
+
+          <Input
+            icon={<Mail size={18} />}
+            placeholder="name@email.com"
+            value={formData.email}
+            onChange={v => handleChange('email', v)}
+            type="email"
+          />
+
+          {/* PASSWORD WITH EYE */}
+          <Input
+            icon={<Lock size={18} />}
+            placeholder="Create a password"
+            value={formData.password}
+            onChange={v => handleChange('password', v)}
+            type={showPassword ? 'text' : 'password'}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(p => !p)}
+                className="text-[#9E9E9E]"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            }
+          />
+
+          {/* CONFIRM PASSWORD (NO EYE) */}
+          <Input
+            icon={<Lock size={18} />}
+            placeholder="Confirm password"
+            value={formData.confirmPassword}
+            onChange={v => handleChange('confirmPassword', v)}
+            type="password"
+          />
+
+          {/* TERMS */}
+          <div className="flex items-start gap-3 mt-2">
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={e => setAgree(e.target.checked)}
+              className="mt-1 h-4 w-4"
+            />
+            <p className="text-xs text-gray-600">
+              I agree to the{' '}
+              <span className="text-[#FFCA20] underline">Terms</span> and{' '}
+              <span className="text-[#FFCA20] underline">Privacy Policy</span>
+            </p>
+          </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3">
+              <AlertCircle size={18} className="text-red-600" />
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
-                  placeholder="John Doe"
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-[58px] rounded-[20px] bg-[#FFCA20] font-semibold flex justify-center items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" size={18} />
+                Creating...
+              </>
+            ) : (
+              <>
+                <UserPlus size={18} />
+                Get Started
+              </>
+            )}
+          </button>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  placeholder="admin@example.com"
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="w-full h-[58px] rounded-[20px] bg-[#EFEFEF] text-[#B0B0B0]"
+          >
+            Login
+          </button>
+        </form>
 
-            {/* Mobile */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mobile Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="tel"
-                  value={formData.mobile}
-                  onChange={(e) => handleChange('mobile', e.target.value)}
-                  placeholder="+91 XXXXX XXXXX"
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">This will be shared with riders</p>
-            </div>
-
-            {/* Shop Name (Optional) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Shop/Business Name <span className="text-gray-400 font-normal">(Optional)</span>
-              </label>
-              <div className="relative">
-                <Store className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={formData.shopName}
-                  onChange={(e) => handleChange('shopName', e.target.value)}
-                  placeholder="ABC Store"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Used to identify your shop</p>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">At least 6 characters</p>
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                <>
-                  <UserPlus className="h-5 w-5" />
-                  Create Account
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Login Link */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <p className="text-center text-sm text-gray-500 mt-6">
-          © 2025 Ozu Admin. All rights reserved.
+        <p className="mt-6 text-xs text-gray-400 text-center">
+          © {new Date().getFullYear()} Ozu Admin
         </p>
       </div>
     </div>
   );
 }
 
-
-
-
+/* ---------- INPUT ---------- */
+function Input({
+  icon,
+  placeholder,
+  value,
+  onChange,
+  type = 'text',
+  rightIcon,
+}: {
+  icon: React.ReactNode;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  rightIcon?: React.ReactNode;
+}) {
+  return (
+    <div className="w-full h-[58px] rounded-[20px] border border-[#E0E0E0] px-4 flex items-center gap-3 bg-white">
+      <div className="text-[#9E9E9E]">{icon}</div>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="flex-1 outline-none text-[14px]"
+      />
+      {rightIcon && <div>{rightIcon}</div>}
+    </div>
+  );
+}

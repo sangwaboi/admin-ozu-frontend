@@ -11,6 +11,9 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  // OAuth helpers (optional to call)
+  signInWithGoogle?: () => Promise<{ error: AuthError | null }>;
+  signUpWithGoogle?: () => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -63,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
             for (let i = 0; i < 6; i++) {
-              code += chars.charAt(Math.floor(Math.random() * chars.length));
+              code += chars.charAt(Math.floor(Math.random() * Math.random() * chars.length));
             }
             return code;
           };
@@ -92,7 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (tenantError) {
           console.error('Error creating tenant:', tenantError);
           // If tenant creation fails, still create admin profile without tenant_id
-          // The admin can set up tenant later
           const { error: profileError } = await supabase
             .from('admin_profiles')
             .insert({
@@ -133,7 +135,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const value = {
+  // OAuth helpers: use Supabase signInWithOAuth.
+  // These will redirect the browser to the provider's consent screen.
+  const signInWithGoogle = async () => {
+    try {
+      const res = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/shipment`, // after OAuth redirect
+        },
+      });
+      // signInWithOAuth typically returns a url for redirect; supabase client handles redirect automatically.
+      // We return any error object so callers can show messages if needed.
+      return { error: (res as any).error ?? null };
+    } catch (err) {
+      return { error: err as AuthError };
+    }
+  };
+
+  // signUpWithGoogle can be the same flow (OAuth sign-in / sign-up handled by provider)
+  const signUpWithGoogle = async () => {
+    try {
+      const res = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/shipment`,
+        },
+      });
+      return { error: (res as any).error ?? null };
+    } catch (err) {
+      return { error: err as AuthError };
+    }
+  };
+
+  const value: AuthContextType = {
     user,
     session,
     loading,
@@ -141,6 +176,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn,
     signOut,
     resetPassword,
+    signInWithGoogle,
+    signUpWithGoogle,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -153,7 +190,3 @@ export function useAuth() {
   }
   return context;
 }
-
-
-
-

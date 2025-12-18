@@ -3,7 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { TenantAPI } from '../../lib/api';
 import { QRCodeSVG } from 'qrcode.react';
-import { ArrowLeft, Copy, Download, CheckCircle, AlertCircle, Store, Share2, QrCode, PlusCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  Copy,
+  Download,
+  CheckCircle,
+ 
+  PlusCircle,
+} from 'lucide-react';
+import Lottie from 'lottie-react';
+import riderAnimation from '@/assets/loader-rider.json';
+
+/* ================= TYPES ================= */
 
 interface Tenant {
   id: number;
@@ -12,46 +23,33 @@ interface Tenant {
   is_active: boolean;
 }
 
+/* ================= COMPONENT ================= */
+
 export default function TenantSettings() {
   const navigate = useNavigate();
   const { user } = useAuth();
+
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [missingTenant, setMissingTenant] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
-  const [missingTenant, setMissingTenant] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  
-  // WhatsApp Business number - configurable via env
-  // Note: Vite env vars are replaced at BUILD time, so you must rebuild after adding to Netlify
-  const whatsappNumber = import.meta.env.VITE_WABA_NUMBER || '919594948009';
-  
-  // Debug: Log env var (remove in production)
-  useEffect(() => {
-    console.log('VITE_WABA_NUMBER:', import.meta.env.VITE_WABA_NUMBER);
-    console.log('Using WhatsApp number:', whatsappNumber);
-  }, []);
+
+  const whatsappNumber =
+    import.meta.env.VITE_WABA_NUMBER || '919594948009';
+
+  /* ================= LOAD TENANT ================= */
 
   useEffect(() => {
-    if (user) {
-      loadTenant();
-    }
+    if (user) loadTenant();
   }, [user]);
-
-  const generateJoinCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  };
 
   const loadTenant = async () => {
     setIsLoading(true);
     setError(null);
     setMissingTenant(false);
-    
+
     try {
       const data = await TenantAPI.getMyTenant();
       if (data) {
@@ -60,11 +58,19 @@ export default function TenantSettings() {
         setMissingTenant(true);
       }
     } catch (err: any) {
-      console.error('Error loading tenant:', err);
-      setError(err.message || 'Failed to load tenant information');
+      setError(err.message || 'Failed to load tenant');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  /* ================= CREATE TENANT ================= */
+
+  const generateJoinCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return Array.from({ length: 6 }, () =>
+      chars.charAt(Math.floor(Math.random() * chars.length))
+    ).join('');
   };
 
   const createTenant = async () => {
@@ -76,14 +82,15 @@ export default function TenantSettings() {
       (user.user_metadata as any)?.shopName ||
       (user.user_metadata as any)?.name ||
       'My Shop';
-    const joinCode = generateJoinCode();
 
     try {
-      const created = await TenantAPI.create(tenantName, joinCode);
+      const created = await TenantAPI.create(
+        tenantName,
+        generateJoinCode()
+      );
       setTenant(created);
       setMissingTenant(false);
     } catch (err: any) {
-      console.error('Error creating tenant:', err);
       setError(err.message || 'Failed to create tenant');
     } finally {
       setIsCreating(false);
@@ -91,313 +98,246 @@ export default function TenantSettings() {
     }
   };
 
+  /* ================= HELPERS ================= */
+
   const generateJoinLink = () => {
     if (!tenant?.join_code) return '';
-    const encodedCode = encodeURIComponent(`JOIN ${tenant.join_code}`);
-    return `https://wa.me/${whatsappNumber}?text=${encodedCode}`;
+    const encoded = encodeURIComponent(`JOIN ${tenant.join_code}`);
+    return `https://wa.me/${whatsappNumber}?text=${encoded}`;
   };
 
   const copyToClipboard = async (type: 'code' | 'link') => {
-    try {
-      let text = '';
-      if (type === 'code') {
-        text = tenant?.join_code || '';
-      } else {
-        text = generateJoinLink();
-      }
-      
-      await navigator.clipboard.writeText(text);
-      setCopied(type);
-      setTimeout(() => setCopied(null), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-      alert('Failed to copy to clipboard');
-    }
+    const text =
+      type === 'code'
+        ? tenant?.join_code || ''
+        : generateJoinLink();
+
+    await navigator.clipboard.writeText(text);
+    setCopied(type);
+    setTimeout(() => setCopied(null), 2000);
   };
 
   const downloadQRCode = () => {
-    if (!tenant) return;
-    
-    // Get the SVG element
-    const svgElement = document.getElementById('qr-code-svg');
-    if (!svgElement) return;
-    
-    // Create a canvas to render the SVG
+    const svg = document.getElementById('qr-code-svg');
+    if (!svg || !tenant) return;
+
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     canvas.width = 200;
     canvas.height = 200;
-    
-    // Convert SVG to image
-    const svgData = new XMLSerializer().serializeToString(svgElement);
+
+    const svgData = new XMLSerializer().serializeToString(svg);
     const img = new Image();
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-    
+    const blob = new Blob([svgData], {
+      type: 'image/svg+xml;charset=utf-8',
+    });
+    const url = URL.createObjectURL(blob);
+
     img.onload = () => {
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, 200, 200);
       ctx.drawImage(img, 0, 0);
-      
-      // Download as PNG
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        const downloadUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = `join-${tenant.join_code}.png`;
-        link.href = downloadUrl;
-        link.click();
-        URL.revokeObjectURL(downloadUrl);
-        URL.revokeObjectURL(url);
-      }, 'image/png');
+      canvas.toBlob((b) => {
+        if (!b) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(b);
+        a.download = `join-${tenant.join_code}.png`;
+        a.click();
+      });
     };
-    
+
     img.src = url;
   };
 
+  /* ================= LOADING ================= */
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading tenant information...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Lottie animationData={riderAnimation} loop style={{ width: 180 }} />
       </div>
     );
   }
+
+  /* ================= NO TENANT ================= */
 
   if (missingTenant) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm border-b">
-          <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/profile')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Shop Join Code</h1>
-                <p className="text-sm text-gray-500 mt-1">Create a tenant to get your join code</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-white px-4 pt-10">
+        <h2 className="text-xl font-semibold mb-4">
+          Tenant not found
+        </h2>
+        <p className="text-gray-500 mb-6">
+          Create your shop to generate a join code.
+        </p>
 
-        <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
-            <div className="flex items-center gap-3 text-red-800">
-              <AlertCircle className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Tenant not found</h2>
-            </div>
-            <p className="text-gray-700">Create your tenant to generate a join code and onboard riders.</p>
-            {error && (
-              <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
-            )}
-            <div className="flex gap-3">
-              <button
-                onClick={createTenant}
-                disabled={isCreating}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-2 font-medium transition-colors"
-              >
-                {isCreating ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <PlusCircle className="h-4 w-4" />
-                    Create Tenant
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => navigate('/profile')}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-              >
-                Go to Profile
-              </button>
-            </div>
-          </div>
-        </div>
+        {error && (
+          <div className="mb-4 text-sm text-red-600">{error}</div>
+        )}
+
+        <button
+          onClick={createTenant}
+          disabled={isCreating}
+          className="w-full h-12 rounded-full bg-[#FFCA28] font-semibold flex items-center justify-center gap-2"
+        >
+          <PlusCircle />
+          {isCreating ? 'Creating…' : 'Create Tenant'}
+        </button>
       </div>
     );
   }
+
+  /* ================= MAIN UI ================= */
 
   const joinLink = generateJoinLink();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/profile')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Shop Join Code</h1>
-              <p className="text-sm text-gray-500 mt-1">Share this code with your riders to join your shop</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-white pb-24 font-[DM Sans]">
+      {/* HEADER */}
+      <header className="px-4 pt-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/profile')}>
+            <ArrowLeft />
+          </button>
+          <h1 className="text-[38px] font-semibold">ozu</h1>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className="space-y-6">
-          {/* Join Code Section */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Store className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Your Unique Join Code</h2>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="bg-gray-50 border-2 border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-gray-600 mb-1">Join Code</p>
-                  <p className="text-3xl font-bold text-blue-600 font-mono tracking-wider">
+      
+      </header>
+
+      {error && (
+        <div className="mx-4 mt-4 rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="px-4 mt-6 space-y-5">
+        {/* JOIN CODE */}
+        <div className="rounded-2xl border p-4">
+         <p className="font-medium">Join code</p>
+          <p className="text-3xl font-bold text-black-600 font-mono tracking-wider">
                     {tenant?.join_code || 'N/A'}
                   </p>
-                </div>
-              </div>
-              <button
-                onClick={() => copyToClipboard('code')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 font-medium transition-colors"
-              >
-                {copied === 'code' ? (
-                  <>
-                    <CheckCircle className="h-4 w-4" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" />
-                    Copy Code
-                  </>
-                )}
-              </button>
-            </div>
-            
-            <p className="text-sm text-gray-500 mt-3">
+
+          <button
+            onClick={() => copyToClipboard('code')}
+            className="mt-4 w-full h-12 rounded-full bg-[#FFCA28] font-semibold flex items-center justify-center gap-2"
+          >
+            {copied === 'code' ? <CheckCircle /> : <Copy />}
+            {copied === 'code' ? 'Copied' : 'Copy Code'}
+          </button>
+   <p className="text-sm text-gray-500 mt-3">
               Riders can join your shop by sending: <code className="bg-gray-100 px-2 py-1 rounded">JOIN {tenant?.join_code}</code>
             </p>
-          </div>
 
-          {/* WhatsApp Link Section */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Share2 className="h-5 w-5 text-green-600" />
-              <h2 className="text-lg font-semibold text-gray-900">WhatsApp Join Link</h2>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={joinLink}
-                  readOnly
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
-                />
-                <button
-                  onClick={() => copyToClipboard('link')}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 font-medium transition-colors whitespace-nowrap"
-                >
-                  {copied === 'link' ? (
-                    <>
-                      <CheckCircle className="h-4 w-4" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" />
-                      Copy Link
-                    </>
-                  )}
-                </button>
-              </div>
-              
-              <p className="text-sm text-gray-500">
-                Share this link with your riders. When they click it, WhatsApp will open with a pre-filled message.
-              </p>
-            </div>
-          </div>
-
-          {/* QR Code Section */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <QrCode className="h-5 w-5 text-purple-600" />
-              <h2 className="text-lg font-semibold text-gray-900">QR Code</h2>
-            </div>
-            
-            <div className="flex flex-col items-center gap-4">
-              <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-                {tenant && (
-                  <div id="qr-code-container">
-                    <QRCodeSVG
-                      id="qr-code-svg"
-                      value={joinLink}
-                      size={200}
-                      level="H"
-                      includeMargin={true}
-                    />
-                  </div>
-                )}
-              </div>
-              
-              <button
-                onClick={downloadQRCode}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 font-medium transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                Download QR Code
-              </button>
-              
-              <p className="text-sm text-gray-500 text-center max-w-md">
-                Print this QR code or share it digitally. Riders can scan it to join your shop.
-              </p>
-            </div>
-          </div>
-
-          {/* Instructions Section */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4">How It Works:</h3>
-            <ol className="space-y-3 text-sm text-blue-800">
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">1</span>
-                <span>Share the WhatsApp link or QR code with your riders</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">2</span>
-                <span>Rider clicks the link or scans the QR code</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">3</span>
-                <span>WhatsApp opens with message: <code className="bg-blue-100 px-1 py-0.5 rounded">JOIN {tenant?.join_code}</code></span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">4</span>
-                <span>Rider sends the message</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">5</span>
-                <span>Rider automatically appears in your <a href="/riders" className="underline font-semibold">Rider Approval</a> page</span>
-              </li>
-            </ol>
-          </div>
 
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {/* WHATSAPP LINK */}
+        <div className="rounded-2xl border p-4 space-y-3">
+          <p className="font-medium">WhatsApp Join Link</p>
+
+          <input
+            readOnly
+            value={joinLink}
+            className="w-full px-4 py-2 border rounded-lg bg-gray-50 text-sm font-mono"
+          />
+
+          <button
+            onClick={() => copyToClipboard('link')}
+            className="w-full h-12 rounded-full bg-black text-white font-medium flex items-center justify-center gap-2"
+          >
+            {copied === 'link' ? <CheckCircle /> : <Copy />}
+            {copied === 'link' ? 'Copied' : 'Copy Link'}
+          </button>
+        </div>
+
+        {/* QR CODE */}
+        <div className="rounded-2xl border p-6 flex flex-col items-center">
+          <QRCodeSVG id="qr-code-svg" value={joinLink} size={180} />
+
+          <button
+            onClick={downloadQRCode}
+            className="mt-5 w-full h-12 rounded-full bg-[#FFCA28] font-semibold flex items-center justify-center gap-2"
+          >
+            <Download />
+            Download QR Code
+          </button>
+        </div>
+
+       {/* INSTRUCTIONS — THEME MATCHED */}
+<div className="rounded-2xl bg-yellow-50 border border-yellow-200 p-5">
+  <h3 className="text-[16px] font-semibold text-gray-900 mb-4">
+    How It Works:
+  </h3>
+
+  <ol className="space-y-3 text-sm text-gray-800">
+    <li className="flex items-start gap-3">
+      <span className="w-6 h-6 bg-[#FFCA28] text-black rounded-full flex items-center justify-center font-semibold">
+        1
+      </span>
+      <span>Share the WhatsApp link or QR code with your riders</span>
+    </li>
+
+    <li className="flex items-start gap-3">
+      <span className="w-6 h-6 bg-[#FFCA28] text-black rounded-full flex items-center justify-center font-semibold">
+        2
+      </span>
+      <span>Rider clicks the link or scans the QR code</span>
+    </li>
+
+    <li className="flex items-start gap-3">
+      <span className="w-6 h-6 bg-[#FFCA28] text-black rounded-full flex items-center justify-center font-semibold">
+        3
+      </span>
+      <span>
+        WhatsApp opens with message:{' '}
+        <code className="bg-yellow-100 px-1 py-0.5 rounded font-mono text-black">
+          JOIN {tenant?.join_code}
+        </code>
+      </span>
+    </li>
+
+    <li className="flex items-start gap-3">
+      <span className="w-6 h-6 bg-[#FFCA28] text-black rounded-full flex items-center justify-center font-semibold">
+        4
+      </span>
+      <span>Rider sends the message</span>
+    </li>
+
+    <li className="flex items-start gap-3">
+      <span className="w-6 h-6 bg-[#FFCA28] text-black rounded-full flex items-center justify-center font-semibold">
+        5
+      </span>
+      <span>
+        Rider automatically appears in{' '}
+        <a href="/riders" className="underline font-semibold text-black">
+          Rider Approval
+        </a>{' '}
+        page
+      </span>
+    </li>
+  </ol>
+</div>
+
       </div>
     </div>
   );
 }
-
