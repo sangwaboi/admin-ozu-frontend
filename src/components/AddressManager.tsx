@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AddressAPI } from '../lib/supabase';
 import type { AdminAddress, CreateAddressInput } from '../types/address';
-import {
-  MapPin,
- 
-  Plus,
-} from 'lucide-react';
+import { MapPin, Plus } from 'lucide-react';
 import LocationSearchInput, { LocationResult } from './LocationSearchInput';
 
 /* ================= COMPONENT ================= */
@@ -64,15 +60,25 @@ export default function AddressManager() {
   return (
     <div className="space-y-3">
 
-      {/* HEADER */}
+       {/* HEADER */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">My Addresses</h3>
+
+        {/* ADD BUTTON — SOURCE OF TRUTH */}
         <button
           onClick={() => {
             setEditingAddress(null);
             setShowAddModal(true);
           }}
-          className="flex items-center gap-1 text-sm px-3 py-2 rounded-xl border hover:bg-gray-50"
+          className="
+            flex items-center gap-1
+            text-sm
+            px-3 py-2
+            rounded-xl
+            border
+            border-[#EAE6E6]
+            bg-[#F3F3F3]
+          "
         >
           <Plus className="w-4 h-4" />
           Add
@@ -83,28 +89,53 @@ export default function AddressManager() {
       {addresses.map(address => (
         <div
           key={address.id}
-          className="w-full rounded-[16px] border border-gray-200 bg-white p-4"
+          className="
+            w-full
+            rounded-[16px]
+            border
+            border-[#E3E3E3]
+            bg-[#F5F5F5]
+            p-4
+          "
         >
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-green-600" />
-                <p className="text-sm font-semibold">
-                  {address.address_name}
-                </p>
+          {/* TITLE + DEFAULT BADGE */}
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2 leading-none">
+              <MapPin className="w-4 h-4 text-green-600" />
 
-                {address.is_default && (
-                  <span className="ml-2 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-600">
-                    Default
-                  </span>
-                )}
-              </div>
-
-              <p className="text-xs text-gray-600">
-                {address.location_address}
+              <p
+                className="
+                  text-sm
+                  font-semibold
+                  text-[#2F2F33]
+                  leading-[120%]
+                "
+              >
+                {address.address_name}
               </p>
             </div>
+
+            {address.is_default && (
+              <span
+                className="
+                  rounded-full
+                  bg-[#F3F3F3]
+                  px-2
+                  py-[2px]
+                  text-[10px]
+                  font-medium
+                  text-[#E53935]
+                "
+              >
+                Default
+              </span>
+            )}
           </div>
+
+          {/* ADDRESS */}
+          <p className="mt-1 text-xs text-gray-600">
+            {address.location_address}
+          </p>
 
           {/* ACTIONS */}
           <div className="mt-3 flex gap-2">

@@ -265,3 +265,20 @@
   color: #6b7280;
   font-weight: 500;
 }
+.name-input {
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid #e5e7eb;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.name-input::placeholder {
+  color: #9ca3af;
+}
+
+.name-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}

@@ -147,20 +147,27 @@ export default function RiderApprovalPage() {
           <button onClick={() => navigate('/shipment')}>
             <ArrowLeft />
           </button>
-          <h1 className="text-[38px] font-semibold">ozu</h1>
+         {/* OZU LOGO */}
+<div className="w-[109px] h-[46px] flex items-center">
+  <img
+    src="/ozu-logo.png"
+    alt="OZU"
+    className="h-[32px] w-auto object-contain"
+  />
+</div>
+
         </div>
 
 
-  <button
-    type="button"
+ <button
     onClick={() => navigate('/profile')}
-    className="profile-btn"
+    className="w-[46px] h-[46px] rounded-full border border-black overflow-hidden"
   >
-   <img
-            src="/ava2.png"
-            alt="Profile"
-            className="w-10 h-10 rounded-full border"
-          />
+    <img
+      src="/ava2.png"
+      alt="Profile"
+      className="w-full h-full object-cover"
+    />
   </button>
 </header>
 
@@ -209,40 +216,48 @@ export default function RiderApprovalPage() {
           />
         )}
       </div>
-       {/* ================= BOTTOM NAV ================= */}
-      <nav className="fixed bottom-0 left-0 right-0 h-[76px] bg-white border-t flex justify-around items-center text-xs">
-        <button
-          onClick={() => navigate('/shipment')}
-          className="flex flex-col items-center"
-        >
-          <Home />
-          HOME
-        </button>
+          {/* ===== BOTTOM NAV (FIGMA EXACT) ===== */}
+<nav className="fixed bottom-0 left-0 right-0 z-50 h-[76px] bg-white rounded-t-2xl shadow-[0_-1px_12px_rgba(0,0,0,0.11)]">
+  <div className="max-w-[439px] mx-auto h-full flex justify-around items-center">
+    
+    {/* HOME */}
+    <button
+      onClick={() => navigate('/shipment')}
+      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+    >
+      <Home size={22} strokeWidth={1.8} />
+      <span className="mt-1">HOME</span>
+    </button>
 
-        <button
-         onClick={() => navigate('/issues')}
-          className="flex flex-col items-center"
-        >
-          <AlertTriangle />
-          ISSUES
-        </button  >
+    {/* ISSUES (ACTIVE SAMPLE) */}
+    <button
+      onClick={() => navigate('/issues')}
+      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+    >
+      <AlertTriangle size={22} strokeWidth={1.8} />
+      <span className="mt-1">ISSUES</span>
+    </button>
 
-        <button
-          onClick={() => navigate('/map')}
-          className="flex flex-col items-center"
-        >
-          <Map />
-          MAP
-        </button>
+    {/* MAP */}
+    <button
+      onClick={() => navigate('/map')}
+      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+    >
+      <Map size={22} strokeWidth={1.8} />
+      <span className="mt-1">MAP</span>
+    </button>
 
-        <button
-          onClick={() => navigate('/riders')}
-         className="flex flex-col items-center text-black font-semibold"
-        >
-          <Bike />
-          RIDERS
-        </button>
-      </nav>
+    {/* RIDERS */}
+    <button
+      onClick={() => navigate('/riders')}
+      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+    >
+      <Bike size={22} strokeWidth={1.8} />
+      <span className="mt-1">RIDERS</span>
+    </button>
+
+  </div>
+</nav>
 
       {/* Edit Name Modal */}
       {showEditModal && selectedRider && (
@@ -447,7 +462,7 @@ function ApprovedRidersTab({ riders, onRemove, processingRiders }: ApprovedRider
                   Removing...
                 </>
               ) : (
-                '🗑️ Remove Rider'
+                'Remove Rider'
               )}
             </button>
           </div>
