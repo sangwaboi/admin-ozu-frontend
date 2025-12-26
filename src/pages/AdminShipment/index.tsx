@@ -352,91 +352,160 @@ function AdminShipment() {
         ))}
       </div>
 
-      {/* Header */}  
-     <header className="px-4 pt-4 flex items-center justify-between">
-        <h1 className="text-[38px] font-semibold tracking-tight">
-          ozu
-        </h1>
-        <button onClick={() => navigate('/profile')}>
-          <img
-            src="/ava2.png"
-            alt="Profile"
-            className="w-10 h-10 rounded-full border"
-          />
-        </button>
-      </header>
+    {/* ===== HEADER (FIGMA EXACT) ===== */}
+<header className="px-4 pt-4 flex items-center justify-between">
+  
+{/* OZU LOGO */}
+<div className="w-[109px] h-[46px] flex items-center">
+  <img
+    src="/ozu-logo.png"
+    alt="OZU"
+    className="h-[32px] w-auto object-contain"
+  />
+</div>
+
+
+  {/* PROFILE AVATAR */}
+  <button
+    onClick={() => navigate('/profile')}
+    className="w-[46px] h-[46px] rounded-full border border-black overflow-hidden"
+  >
+    <img
+      src="/ava2.png"
+      alt="Profile"
+      className="w-full h-full object-cover"
+    />
+  </button>
+
+</header>
+
 
 
       {/* Header */}
     <div className="bg-white text-black">
         <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
         
+{/* ===== PICKUP / DROP / BOOK ===== */}
+<div className="px-4 mt-4 space-y-4 relative">
 
-        {/* ===== PICKUP / DROP / BOOK ===== */}
-      <div className="px-4 mt-4 space-y-3">
+  {/* PICKUP */}
+  <AddressSelector
+    selectedAddress={selectedAddress}
+    onAddressChange={setSelectedAddress}
+  />
 
-        {/* Pickup */}
-        <AddressSelector
-          selectedAddress={selectedAddress}
-          onAddressChange={setSelectedAddress}
-        />
+  {/* DROP LOCATION (same size & style as pickup) */}
+  <button
+    onClick={() => setShowBooking(true)}
+    className="
+      w-full
+      h-[64px]
+      px-4
+      bg-[#F5F5F5]
+      border
+      border-[#9CA3AF]
+      rounded-[16px]
+      flex
+      items-center
+      justify-between
+    "
+  >
+    <div className="flex items-center gap-3 min-w-0">
+      {/* icon placeholder to align with pickup */}
+      <span className="w-5 h-5 rounded-full bg-[#DC2626]" />
 
-        {/* Drop Location */}
-        <button
-          onClick={() => setShowBooking(true)}
-          className="h-[56px] w-full border rounded-xl px-3 flex items-center gap-3 text-sm text-gray-500 hover:bg-gray-50"
-        >
-          <span className="w-3 h-3 rounded-full bg-red-500" />
-          Enter Drop Location and Details
-        </button>
-
-        {/* Book Now */}
-        <button
-          onClick={() => setShowBooking(true)}
-          className="w-full h-[52px] rounded-xl bg-[#FFCA28] font-semibold"
-        >
-          Book Now
-        </button>
+      <div className="min-w-0 text-left">
+        <p className="text-sm text-[#6B7280] font-medium">
+          Enter Drop Location
+        </p>
+        <p className="text-[15px] font-semibold text-black truncate">
+          Drop location & details
+        </p>
       </div>
+    </div>
+  </button>
+
+  {/* BOOK NOW */}
+  <button
+    onClick={() => setShowBooking(true)}
+    className="
+      w-full
+      h-[56px]
+      rounded-[28px]
+      bg-[#FFCA28]
+      text-[18px]
+      font-semibold
+      text-black
+    "
+  >
+    Book Now
+  </button>
+
+</div>
+
+
          
 </div>
-      </div>
+       </div>
         {/* ===== QUICK ACTIONS ===== */}
-      <div className="px-4 mt-6 grid grid-cols-3 gap-3 text-center text-[11px]">
+{/* ===== QUICK ACTIONS ===== */}
+<div className="px-4 mt-6 grid grid-cols-3 gap-3 text-center">
+  
+  {/* Card 1 */}
+  <button
+    onClick={() => navigate('/profile')}
+    className="flex flex-col items-center"
+  >
+    <div className="w-[126.57px] h-[97px] bg-[#F5F5F5] border border-[#C8C8C8] rounded-[10px] flex items-center justify-center">
+      <img
+        src="/undraw_delivery-address_409g.svg"
+        className="h-[44px] w-auto"
+        alt=""
+      />
+    </div>
 
-        <button
-          onClick={() => navigate('/profile')}
-          className="bg-gray-50 rounded-xl p-3"
-        >
-          <img
-            src="/undraw_delivery-address_409g.svg"
-            className="mx-auto h-16"
-          />
-          <p className="mt-2">Add / Update Pickup Point</p>
-        </button>
+    <p className="mt-2 text-[12px] font-semibold leading-[125%] tracking-[-0.01em] text-[#242424] text-center">
+      Add / Update Pickup Point
+    </p>
+  </button>
 
-        <button
-          onClick={() => navigate('/profile')}
-          className="bg-gray-50 rounded-xl p-3"
-        >
-          <img
-            src="/undraw_mobile-app_qxev.svg"
-            className="mx-auto h-16"
-          />
-          <p className="mt-2">Update Contact Number</p>
-        </button>
+  {/* Card 2 */}
+  <button
+    onClick={() => navigate('/profile')}
+    className="flex flex-col items-center"
+  >
+    <div className="w-[126.57px] h-[97px] bg-[#F5F5F5] border border-[#C8C8C8] rounded-[10px] flex items-center justify-center">
+      <img
+        src="/undraw_mobile-app_qxev.svg"
+        className="h-[44px] w-auto"
+        alt=""
+      />
+    </div>
 
-        <button
-          onClick={() => navigate('/issues')}
-          className="bg-gray-50 rounded-xl p-3"
-        >
-          <img
-            src="/undraw_questions_g2px.svg"
-            className="mx-auto h-16"
-          />
-          <p className="mt-2">Check Delivery Issues</p>
-        </button>
-      </div>
+    <p className="mt-2 text-[12px] font-semibold leading-[125%] tracking-[-0.01em] text-[#242424] text-center">
+      Update Contact Number
+    </p>
+  </button>
+
+  {/* Card 3 */}
+  <button
+    onClick={() => navigate('/issues')}
+    className="flex flex-col items-center"
+  >
+    <div className="w-[126.57px] h-[97px] bg-[#F5F5F5] border border-[#C8C8C8] rounded-[10px] flex items-center justify-center">
+      <img
+        src="/undraw_questions_g2px.svg"
+        className="h-[44px] w-auto"
+        alt=""
+      />
+    </div>
+
+    <p className="mt-2 text-[12px] font-semibold leading-[125%] tracking-[-0.01em] text-[#242424] text-center">
+      Check Delivery Issues
+    </p>
+  </button>
+
+</div>
 
 
       {/* Main Content */}
@@ -444,12 +513,28 @@ function AdminShipment() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
          {/* ===== BOOKING MODAL ===== */}
 {showBooking && (
-  <ShipmentForm
-    onSubmit={handleShipmentCreate}
-    disabled={!selectedAddress || !adminMobile}
-    onClose={() => setShowBooking(false)} // ✅ added
-  />
+  <div className="fixed inset-0 z-[60] flex items-end bg-black/40">
+    {/* Modal container */}
+    <div
+      className="
+        w-full
+        max-h-[calc(100vh-76px)]
+        bg-white
+        rounded-t-2xl
+        overflow-y-auto
+        overscroll-contain
+        pb-6
+      "
+    >
+      <ShipmentForm
+        onSubmit={handleShipmentCreate}
+        disabled={!selectedAddress || !adminMobile}
+        onClose={() => setShowBooking(false)}
+      />
+    </div>
+  </div>
 )}
+
 
           {/* Right: Tracking & Status */}
          {/* Right: Tracking & Status */}
@@ -619,50 +704,9 @@ function AdminShipment() {
                 </div>
               )}
             </div>
-        {/* ===== ILLUSTRATION ===== */}
-  <div className="mt-6 relative overflow-hidden">
-  <p className="text-center text-xs text-gray-400 mb-2 relative z-10">
-    Made with ❤️ in India
-  </p>
 
 
-</div>
-
-      
-    
-        {/* ===== BOTTOM NAV ===== */}
-      <nav className="fixed bottom-0 left-0 right-0 h-[76px] bg-white border-t flex justify-around items-center text-xs">
-        <button
-          onClick={() => navigate('/shipment')}
-          className="flex flex-col items-center"
-        >
-          <Home />
-          HOME
-        </button>
-        <button
-          onClick={() => navigate('/issues')}
-          className="flex flex-col items-center"
-        >
-          <AlertTriangle />
-          ISSUES
-        </button>
-        <button
-          onClick={() => navigate('/map')}
-          className="flex flex-col items-center"
-        >
-          <Map />
-          MAP
-        </button>
-        <button
-          onClick={() => navigate('/riders')}
-          className="flex flex-col items-center"
-        >
-          <Bike />
-          RIDERS
-        </button>
-      </nav>
-
-            {/* Active Shipment Details - Only show on Active tab */}
+  {/* Active Shipment Details - Only show on Active tab */}
             {currentTab === 'active' && activeShipment && (
               <>
                 <RiderStatus 
@@ -684,6 +728,65 @@ function AdminShipment() {
 
 
             )}
+
+
+            
+        {/* ===== ILLUSTRATION ===== */}
+  <div className="relative w-full flex justify-center">
+  <div className="w-[339px] h-[18px] flex items-center justify-center">
+    <p className="text-[12px] font-normal leading-[18px] text-[#9CA3AF] text-center">
+      Made with ❤️ in India
+    </p>
+  </div>
+</div>
+
+
+      
+    
+     {/* ===== BOTTOM NAV (FIGMA EXACT) ===== */}
+<nav className="fixed bottom-0 left-0 right-0 z-50 h-[76px] bg-white rounded-t-2xl shadow-[0_-1px_12px_rgba(0,0,0,0.11)]">
+  <div className="max-w-[439px] mx-auto h-full flex justify-around items-center">
+    
+    {/* HOME */}
+    <button
+      onClick={() => navigate('/shipment')}
+      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+    >
+      <Home size={22} strokeWidth={1.8} />
+      <span className="mt-1">HOME</span>
+    </button>
+
+    {/* ISSUES (ACTIVE SAMPLE) */}
+    <button
+      onClick={() => navigate('/issues')}
+      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+    >
+      <AlertTriangle size={22} strokeWidth={1.8} />
+      <span className="mt-1">ISSUES</span>
+    </button>
+
+    {/* MAP */}
+    <button
+      onClick={() => navigate('/map')}
+      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+    >
+      <Map size={22} strokeWidth={1.8} />
+      <span className="mt-1">MAP</span>
+    </button>
+
+    {/* RIDERS */}
+    <button
+      onClick={() => navigate('/riders')}
+      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+    >
+      <Bike size={22} strokeWidth={1.8} />
+      <span className="mt-1">RIDERS</span>
+    </button>
+
+  </div>
+</nav>
+
+        
          
           </div>
         </div>
