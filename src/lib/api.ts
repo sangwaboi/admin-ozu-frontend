@@ -56,10 +56,10 @@ export function getBaseUrl() {
 
 // Riders endpoints (adjust to your FastAPI routes if needed)
 export const RidersAPI = {
-  listLive: async () => {
+  listLive: async (): Promise<import("../types/rider").Rider[]> => {
     const cacheKey = CacheKeys.RIDERS_LIVE;
     const cached = cache.get(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as import("../types/rider").Rider[];
     
     const data = await apiGet<import("../types/rider").Rider[]>("/riders/live");
     cache.set(cacheKey, data, CacheTTL.RIDERS);

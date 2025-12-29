@@ -25,10 +25,11 @@ export function useRiders(pollMs = 5000) {
     try {
       // API will use cache if available, otherwise fetch fresh
       const data = await RidersAPI.listLive();
-      setRiders(data);
+      setRiders(data || []);
       setLastUpdated(new Date().toISOString());
     } catch (err) {
       console.error("useRiders.refresh error", err);
+      setRiders([]);
     } finally {
       setLoading(false);
     }

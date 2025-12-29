@@ -15,7 +15,7 @@ export function LocationTracker({ riderId, isActive, onLocationUpdate }: Locatio
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   
   const watchIdRef = useRef<number | null>(null);
-  const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const updateIntervalRef = useRef<number | null>(null);
   const lastKnownCoordsRef = useRef<GeolocationCoordinates | null>(null);
 
   // Send location to backend
@@ -139,7 +139,7 @@ export function LocationTracker({ riderId, isActive, onLocationUpdate }: Locatio
     watchIdRef.current = watchId;
 
     // Also send updates every 10 seconds (even if position doesn't change much)
-    updateIntervalRef.current = setInterval(() => {
+    updateIntervalRef.current = window.setInterval(() => {
       if (lastKnownCoordsRef.current) {
         updateLocationToBackend(lastKnownCoordsRef.current);
       }
@@ -156,7 +156,7 @@ export function LocationTracker({ riderId, isActive, onLocationUpdate }: Locatio
     }
 
     if (updateIntervalRef.current) {
-      clearInterval(updateIntervalRef.current);
+      window.clearInterval(updateIntervalRef.current);
       updateIntervalRef.current = null;
     }
 

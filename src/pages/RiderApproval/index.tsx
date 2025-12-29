@@ -27,12 +27,18 @@ export default function RiderApprovalPage() {
         const cachedPending = cache.get(CacheKeys.RIDERS_PENDING);
         const cachedApproved = cache.get(CacheKeys.RIDERS_APPROVED);
         
-        if (cachedPending) {
-          setPendingRiders(cachedPending.riders || []);
+        if (cachedPending && Array.isArray(cachedPending)) {
+          setPendingRiders(cachedPending);
+        } else if (cachedPending && typeof cachedPending === 'object' && 'riders' in cachedPending) {
+          setPendingRiders((cachedPending as any).riders || []);
         }
-        if (cachedApproved) {
-          setApprovedRiders(cachedApproved.riders || []);
+        
+        if (cachedApproved && Array.isArray(cachedApproved)) {
+          setApprovedRiders(cachedApproved);
+        } else if (cachedApproved && typeof cachedApproved === 'object' && 'riders' in cachedApproved) {
+          setApprovedRiders((cachedApproved as any).riders || []);
         }
+        
         if (cachedPending || cachedApproved) {
           setLoading(false);
         }
@@ -40,11 +46,23 @@ export default function RiderApprovalPage() {
 
       // Fetch pending riders (will use cache if available)
       const pendingData = await RidersAPI.getPending();
-      setPendingRiders(pendingData.riders || []);
+      if (Array.isArray(pendingData)) {
+        setPendingRiders(pendingData);
+      } else if (pendingData && typeof pendingData === 'object' && 'riders' in pendingData) {
+        setPendingRiders((pendingData as any).riders || []);
+      } else {
+        setPendingRiders([]);
+      }
 
       // Fetch approved riders (will use cache if available)
       const approvedData = await RidersAPI.getApproved();
-      setApprovedRiders(approvedData.riders || []);
+      if (Array.isArray(approvedData)) {
+        setApprovedRiders(approvedData);
+      } else if (approvedData && typeof approvedData === 'object' && 'riders' in approvedData) {
+        setApprovedRiders((approvedData as any).riders || []);
+      } else {
+        setApprovedRiders([]);
+      }
 
     } catch (error) {
       console.error('Error fetching riders:', error);
