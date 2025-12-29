@@ -10,6 +10,11 @@ import Welcome from './pages/Auth/Welcome';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 
+/* Rider pages */
+import RiderLogin from './pages/RiderAuth/RiderLogin';
+import RiderSignup from './pages/RiderAuth/RiderSignup';
+import RiderDashboard from './pages/RiderDashboard';
+
 /* App pages */
 import AdminPortal from '@/pages/AdminPortal';
 import AdminShipment from '@/pages/AdminShipment';
@@ -29,6 +34,10 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           
+          {/* ================= RIDER ROUTES ================= */}
+          <Route path="/rider/login" element={<RiderLogin />} />
+          <Route path="/rider/signup" element={<RiderSignup />} />
+          <Route path="/rider/dashboard" element={<RiderDashboard />} />
 
           {/* ================= PROTECTED ROUTES ================= */}
          
