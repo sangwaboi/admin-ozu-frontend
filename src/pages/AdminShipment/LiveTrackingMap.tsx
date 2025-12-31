@@ -1,11 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { AdminLocation } from './index';
-import { ShipmentAPI } from '../../lib/api';
-import { cache, CacheKeys, CacheTTL } from '../../lib/cache';
-import { getRidersSocket } from '../../lib/socket';
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -55,34 +52,8 @@ function MapUpdater({ bounds }: { bounds: L.LatLngBounds | null }) {
 }
 
 function LiveTrackingMap({ adminLocation, shipment }: LiveTrackingMapProps) {
-  const [riderLocation, setRiderLocation] = useState<{ lat: number; lng: number; updated_at?: string } | null>(null);
+  const [riderLocation, setRiderLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [customerLocation, setCustomerLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
-
-  // Load rider location from cache immediately (instant display)
-  const loadCachedRiderLocation = useCallback((riderId: string | number) => {
-    const cacheKey = CacheKeys.RIDER_LOCATION(riderId);
-    const cached = cache.get<{ lat: number; lng: number; updated_at?: string }>(cacheKey);
-    if (cached && cached.lat && cached.lng) {
-      setRiderLocation(cached);
-      setLastUpdate(cached.updated_at || null);
-      return true; // Found in cache
-    }
-    return false; // Not in cache
-  }, []);
-
-  // Fetch rider location with caching
-  const fetchRiderLocation = useCallback(async (riderId: string | number) => {
-    try {
-      const data = await ShipmentAPI.getRiderLocation(String(riderId));
-      if (data && data.lat && data.lng) {
-        setRiderLocation({ lat: data.lat, lng: data.lng, updated_at: data.updated_at });
-        setLastUpdate(data.updated_at || new Date().toISOString());
-      }
-    } catch (error) {
-      console.error('Failed to fetch rider location:', error);
-    }
-  }, []);
 
   useEffect(() => {
     // Parse customer location from link
@@ -93,56 +64,28 @@ function LiveTrackingMap({ adminLocation, shipment }: LiveTrackingMapProps) {
       }
     }
 
-    // Load rider location (only after acceptance)
+    // Poll for rider location updates (only after acceptance)
     if (shipment?.acceptedRiderId) {
-      const riderId = shipment.acceptedRiderId;
-      
-      // Try cache first for instant display
-      loadCachedRiderLocation(riderId);
-      
-      // Fetch fresh data immediately (even if cached)
-      fetchRiderLocation(riderId);
-      
-      // Set up polling every 5 seconds
-      const interval = setInterval(() => {
-        fetchRiderLocation(riderId);
-      }, 5000);
-
-      // Set up WebSocket listener for real-time updates
-      const socket = getRidersSocket();
-      const handleRiderUpdate = (payload: any) => {
-        if (payload.rider_id === String(riderId) || payload.id === String(riderId)) {
-          if (payload.lat && payload.lng) {
-            setRiderLocation({ 
-              lat: payload.lat, 
-              lng: payload.lng,
-              updated_at: payload.updated_at || new Date().toISOString()
-            });
-            setLastUpdate(payload.updated_at || new Date().toISOString());
-            
-            // Update cache
-            const cacheKey = CacheKeys.RIDER_LOCATION(riderId);
-            cache.set(cacheKey, { 
-              lat: payload.lat, 
-              lng: payload.lng,
-              updated_at: payload.updated_at 
-            }, CacheTTL.RIDER_LOCATION);
+      const fetchRiderLocation = async () => {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_BACKEND_BASE_URL}/riders/${shipment.acceptedRiderId}/location`
+          );
+          const data = await response.json();
+          if (data.lat && data.lng) {
+            setRiderLocation({ lat: data.lat, lng: data.lng });
           }
+        } catch (error) {
+          console.error('Failed to fetch rider location:', error);
         }
       };
 
-      socket.on('rider_update', handleRiderUpdate);
+      fetchRiderLocation();
+      const interval = setInterval(fetchRiderLocation, 5000); // Update every 5 seconds
 
-      return () => {
-        clearInterval(interval);
-        socket.off('rider_update', handleRiderUpdate);
-      };
-    } else {
-      // No rider assigned yet
-      setRiderLocation(null);
-      setLastUpdate(null);
+      return () => clearInterval(interval);
     }
-  }, [shipment, loadCachedRiderLocation, fetchRiderLocation]);
+  }, [shipment]);
 
   const parseLocationLink = (link: string): { lat: number; lng: number } | null => {
     try {
@@ -265,11 +208,6 @@ function LiveTrackingMap({ adminLocation, shipment }: LiveTrackingMapProps) {
                 <div className="text-sm">
                   <strong className="text-green-600">Rider</strong>
                   <p className="text-xs text-gray-600 mt-1">On the way...</p>
-                  {lastUpdate && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Updated: {new Date(lastUpdate).toLocaleTimeString()}
-                    </p>
-                  )}
                 </div>
               </Popup>
             </Marker>

@@ -1,0 +1,580 @@
+/* Root */
+.as-root {
+  min-height: 100vh;
+ 
+  background: #ffffff;
+  overflow-x: hidden;
+  padding-bottom: 120px; /* prevents overlap with bottom nav */
+  box-sizing: border-box;
+  font-family: 'DM Sans', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  width: 100%;
+  max-width: 35%;
+  margin: 0 auto;
+}
+
+/* Notifications */
+.as-notifications {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.as-notification {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(90deg, #7c3aed, #6d28d9);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  animation: as-slide-in 220ms ease;
+}
+
+@keyframes as-slide-in {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.as-notification-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.as-notification-text {
+  font-weight: 500;
+}
+
+/* Header */
+.as-header {
+  padding: 16px 0; /* horizontal padding removed to rely on global px-4 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.as-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.as-invisible-back {
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+  border: none;
+}
+
+.as-logo img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Avatar */
+.as-avatar-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 9999px;
+  overflow: hidden;
+  padding: 0;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.as-avatar-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Top section */
+.as-top-section {
+  background: #fff;
+  color: #000;
+}
+
+.as-top-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px 0; /* horizontal padding removed to rely on global px-4 */
+}
+
+.as-booking-area {
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Drop button */
+.as-drop-btn {
+  width: 100%;
+  height: 64px;
+  padding: 0 16px; /* internal control padding kept */
+  background: #F5F5F5;
+  font-weight: 500;
+  border: 1px solid #9CA3AF;
+      border-width: 2px;
+    border-style: solid;
+    border-color: #d1d5db;
+
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.as-drop-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.as-drop-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, #ffffff 30%, #D03B2A 26%);
+  flex-shrink: 0;
+}
+
+.as-drop-text .as-drop-sub {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.as-drop-text .as-drop-main {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Book now button */
+.as-booknow-btn {
+  width: 100%;
+  height: 57px;
+  border-radius: 12px; /* rounded-xl */ 
+  background-color: #FFCA20; 
+  color: #000000; 
+  font-weight: 700; /* font-semibold */
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-size: 17px;
+}
+
+/* Quick actions */
+.as-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px 0; /* horizontal padding removed to rely on global px-4 */
+}
+
+.as-quick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.as-quick-illustration {
+  width: 126.57px;
+  height: 97px;
+  background: #F5F5F5;
+  border: 1px solid #C8C8C8;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+      box-shadow: 3px 3px #f1f1f1;
+}
+
+.as-quick-illustration img {
+  height: 44px;
+  width: auto;
+}
+
+.as-quick-label {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #242424;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Main grid */
+.as-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 0; /* horizontal padding removed to rely on global px-4 */
+  box-sizing: border-box;
+}
+
+.as-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+ 
+  .as-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Booking modal wrapper */
+.as-booking-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0,0,0,0.4);
+}
+
+.as-booking-modal-inner {
+  width: 100%;
+  max-height: calc(100vh - 76px);
+  background: #fff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 24px;
+}
+
+/* Shipments card */
+.as-shipments-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+/* Tabs */
+.as-tabs {
+  display: flex;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.as-tab {
+  flex: 1;
+  padding: 10px 16px; /* internal padding kept */
+  font-weight: 600;
+  font-size: 13px; /* slightly smaller */
+  background: #f9fafb;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+      border: 1px solid #C8C8C8;
+    border-top-left-radius: 17px;
+    border-top-right-radius: 17px;
+}
+
+.as-tab-active {
+  color: #7c3aed;
+  border-bottom: 2px solid #7c3aed;
+  background: #fff;
+}
+
+.as-tab-inactive {
+  color: #6b7280;
+}
+
+/* Tab icon sizing */
+.as-tab-icon {
+  width: 16px;   /* smaller icon */
+  height: 16px;
+  margin-right: 6px;
+  flex-shrink: 0;
+  display: none;
+}
+
+/* Badge */
+.as-badge {
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.as-badge-active {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.as-badge-inactive {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+/* Active list */
+.as-active-list {
+  padding: 12px;
+}
+
+.as-active-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.as-shipment-btn {
+  padding: 10px 16px; /* internal padding kept */
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  position: relative;
+  cursor: pointer;
+  border: none;
+}
+
+.as-shipment-active {
+  background: linear-gradient(90deg, #7c3aed, #6d28d9);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.18);
+}
+
+.as-shipment-inactive {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.as-shipment-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.as-shipment-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.as-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+.as-dot.amber { background: #f59e0b; animation: pulse 1.6s infinite; }
+.as-dot.green { background: #34d399; }
+.as-dot.blue { background: #60a5fa; animation: pulse 1.6s infinite; }
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.as-issue-dot {
+  width: 8px;
+  height: 8px;
+  background: #f87171;
+  border-radius: 9999px;
+  display: inline-block;
+  animation: pulse 1.6s infinite;
+}
+
+.as-shipment-sub {
+  font-size: 12px;
+}
+
+.as-sub-active { color: #f3e8ff; }
+.as-sub-inactive { color: #7c3aed; }
+
+.as-shipment-issue { font-size: 12px; }
+.as-issue-active { color: #fef3c7; }
+.as-issue-inactive { color: #ef4444; }
+
+/* Empty state */
+.as-empty {
+  text-align: center;
+}
+
+.as-empty-icon {
+  width: 48px;
+  height: 48px;
+  color: #e5e7eb;
+  margin: 0 auto 12px;
+}
+
+.as-empty-text {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Completed list */
+.as-completed-list { padding: 12px; }
+
+.as-completed-item {
+  background: #f9fafb;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.as-completed-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.as-completed-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.as-completed-title { font-weight: 600; color: #111827; margin: 0; }
+
+.as-delivered-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  background: #f3e8ff;
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.as-completed-price { font-size: 18px; font-weight: 700; color: #374151; }
+
+/* Boxes */
+.as-box {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #f3f4f6;
+  margin-bottom: 8px;
+}
+
+.as-box-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.as-box-content p { margin: 0; color: #4b5563; font-size: 14px; }
+
+.as-muted { color: #6b7280; }
+
+/* Delivered at */
+.as-delivered-at { font-size: 12px; color: #9ca3af; margin-top: 8px; }
+
+/* Right column */
+.as-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* Force right column to span full width below shipments card */
+  grid-column: 1 / -1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Made with */
+.as-made-with {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 18px;
+}
+
+.as-made-with p {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin: 0;
+}
+
+/* Footer image */
+.as-footer-image {
+  width: 100%;
+  opacity: 0.2;
+  display: block;
+  margin-top: 12px;
+  grid-column: 1 / -1;
+}
+
+/* Center active shipment buttons and completed items */
+.as-active-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center; /* center the row of buttons */
+  align-items: center;
+}
+
+.as-shipment-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Center completed items container */
+.as-completed-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center; /* center each completed card horizontally */
+}
+
+/* Make completed cards keep their width but remain centered */
+.as-completed-item {
+  width: 100%;
+  max-width: 720px; /* adjust max width as needed */
+  box-sizing: border-box;
+}
+
+/* Keep empty state centered */
+.as-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Optional: slightly reduce horizontal padding on very small screens */
+@media (max-width: 420px) {
+  .as-shipment-btn { padding: 8px 12px; }
+  .as-completed-item { padding: 10px; }
+  
+}
+
+
+@media (max-width: 768px) {
+  
+   .as-root{max-width: 100%;}
+}
