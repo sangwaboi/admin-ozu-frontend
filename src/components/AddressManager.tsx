@@ -55,7 +55,7 @@ export default function AddressManager() {
   return (
     <div className="space-y-3">
 
-       {/* HEADER */}
+      {/* HEADER */}
       <div className="flex items-center justify-between">
         <h3 className="text-[14px] font-semibold text-[#1F1F24]">
           My Addresses

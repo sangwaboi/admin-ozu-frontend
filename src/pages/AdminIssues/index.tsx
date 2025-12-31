@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { ShipmentIssue } from '@/types/issue';
 import { IssuesAPI } from '@/lib/api';
 import IssueCard from './IssueCard';
-import { Home, Map, AlertTriangle, Bike, RotateCcw,ArrowLeft } from 'lucide-react';
+import { Home, Map, AlertTriangle, Bike, RotateCcw, ArrowLeft } from 'lucide-react';
 import Lottie from 'lottie-react';
 import loadingIssuesAnimation from '@/assets/loading-issues.json';
-
+import './AdminIssues.css';
 
 export default function AdminIssues() {
   const navigate = useNavigate();
@@ -38,98 +38,63 @@ export default function AdminIssues() {
     issues.filter(i => i.status === s).length;
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] pb-28 font-[DM Sans]">
+    <div className="ai-root">
 
       {/* ================= TOP BAR ================= */}
-<header className="bg-white px-4 pt-4 pb-3">
+      <header className="ai-topbar">
 
+        <div className="ai-topbar-row">
+          <div className="ai-left-group">
+            <button className="ai-back-btn" onClick={() => navigate('/shipment')}>
+              <ArrowLeft />
+            </button>
 
-        <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/shipment')}>
-            <ArrowLeft />
+            {/* OZU LOGO */}
+            <div className="ai-logo-wrap">
+              <img
+                src="/ozu-logo.png"
+                alt="OZU"
+                className="ai-logo-img"
+              />
+            </div>
+          </div>
+
+          {/* PROFILE AVATAR */}
+          <button
+            onClick={() => navigate('/profile')}
+            className="ai-profile-btn"
+            aria-label="Profile"
+          >
+            <img
+              src="/ava2.png"
+              alt="Profile"
+              className="ai-profile-img"
+            />
           </button>
-          {/* OZU LOGO */}
-<div className="w-[109px] h-[46px] flex items-center">
-  <img
-    src="/ozu-logo.png"
-    alt="OZU"
-    className="h-[32px] w-auto object-contain"
-  />
-</div>
-
         </div>
 
-         {/* PROFILE AVATAR */}
-  <button
-    onClick={() => navigate('/profile')}
-    className="w-[46px] h-[46px] rounded-full border border-black overflow-hidden"
-  >
-    <img
-      src="/ava2.png"
-      alt="Profile"
-      className="w-full h-full object-cover"
-    />
-  </button>
+        <div className="ai-title-row">
+          <div className="ai-title-block">
+            <h2 className="ai-title">Delivery Issues</h2>
 
+            <p className="ai-subtitle">
+              Manage and respond to delivery issues
+            </p>
+          </div>
+
+          <button
+            onClick={fetchIssues}
+            className="ai-refresh-button"
+          >
+            <RotateCcw className="ai-refresh-icon" />
+            <span>Refresh</span>
+          </button>
         </div>
-
-       <div className="mt-3 flex justify-between">
-  {/* LEFT: Title + subtitle stacked */}
-  <div>
-    <h2
-      className="
-        text-[20px]
-        font-bold
-        leading-[120%]
-        tracking-[-0.02em]
-        text-[#111111]
-      "
-    >
-      Delivery Issues
-    </h2>
-
-    <p
-      className="
-        mt-[2px]
-        text-[14px]
-        font-medium
-        leading-[130%]
-        tracking-[-0.01em]
-        text-[#5F5F5F]
-      "
-    >
-      Manage and respond to delivery issues
-    </p>
-  </div>
-
-  {/* RIGHT: Refresh button */}
-  <button
-    onClick={fetchIssues}
-    className="
-      flex items-center gap-2
-      w-[101px] h-[32px]
-      px-3
-      border border-[#EAE6E6]
-      rounded-lg
-      text-[13px]
-      font-medium
-      text-[#111111]
-      bg-white
-      self-start
-    "
-  >
-    <RotateCcw className="w-4 h-4" />
-    Refresh
-  </button>
-</div>
-
       </header>
 
       {/* ================= FILTER CARDS ================= */}
-<div className="px-4 bg-white pt-4">
-
-        <div className="grid grid-cols-4 gap-2">
+      <div className="ai-filters-container">
+        <div className="ai-filters-grid">
           <FilterBox
             label="All Issues"
             value={issues.length}
@@ -157,22 +122,20 @@ export default function AdminIssues() {
             active={filter === 'resolved'}
             onClick={() => setFilter('resolved')}
           />
-          
         </div>
       </div>
 
       {/* ================= ISSUE LIST ================= */}
-      <div className="px-4 mt-4 space-y-4">
+      <div className="ai-issues-list">
         {loading ? (
-  <div className="flex justify-center items-center py-10">
-    <Lottie
-      animationData={loadingIssuesAnimation}
-      loop
-      className="w-[180px] h-[180px]"
-    />
-  </div>
-) : (
-
+          <div className="ai-loading-wrap">
+            <Lottie
+              animationData={loadingIssuesAnimation}
+              loop
+              className="ai-loading-lottie"
+            />
+          </div>
+        ) : (
           filteredIssues.map(issue => (
             <IssueCard
               key={issue.id}
@@ -183,49 +146,46 @@ export default function AdminIssues() {
         )}
       </div>
 
-      {/* ================= BOTTOM NAV ================= */}
-      {/* ===== BOTTOM NAV (FIGMA EXACT) ===== */}
-<nav className="fixed bottom-0 left-0 right-0 z-50 h-[76px] bg-white rounded-t-2xl shadow-[0_-1px_12px_rgba(0,0,0,0.11)]">
-  <div className="max-w-[439px] mx-auto h-full flex justify-around items-center">
-    
-    {/* HOME */}
-    <button
-      onClick={() => navigate('/shipment')}
-      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
-    >
-      <Home size={22} strokeWidth={1.8} />
-      <span className="mt-1">HOME</span>
-    </button>
+        {/* ===== BOTTOM NAV (FIGMA EXACT) ===== */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 h-[76px] bg-white rounded-t-2xl shadow-[0_-1px_12px_rgba(0,0,0,0.11)]">
+        <div className="max-w-[439px] mx-auto h-full flex justify-around items-center">
+          {/* HOME */}
+          <button
+            onClick={() => navigate("/shipment")}
+            className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+          >
+            <Home size={22} strokeWidth={1.8} />
+            <span className="mt-1">HOME</span>
+          </button>
 
-    {/* ISSUES (ACTIVE SAMPLE) */}
-    <button
-      onClick={() => navigate('/issues')}
-      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
-    >
-      <AlertTriangle size={22} strokeWidth={1.8} />
-      <span className="mt-1">ISSUES</span>
-    </button>
+          {/* ISSUES (ACTIVE SAMPLE) */}
+          <button
+            onClick={() => navigate("/issues")}
+            className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+          >
+            <AlertTriangle size={22} strokeWidth={1.8} />
+            <span className="mt-1">ISSUES</span>
+          </button>
 
-    {/* MAP */}
-    <button
-      onClick={() => navigate('/map')}
-      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
-    >
-      <Map size={22} strokeWidth={1.8} />
-      <span className="mt-1">MAP</span>
-    </button>
+          {/* MAP */}
+          <button
+            onClick={() => navigate("/map")}
+            className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+          >
+            <Map size={22} strokeWidth={1.8} />
+            <span className="mt-1">MAP</span>
+          </button>
 
-    {/* RIDERS */}
-    <button
-      onClick={() => navigate('/riders')}
-      className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
-    >
-      <Bike size={22} strokeWidth={1.8} />
-      <span className="mt-1">RIDERS</span>
-    </button>
-
-  </div>
-</nav>
+          {/* RIDERS */}
+          <button
+            onClick={() => navigate("/riders")}
+            className="flex flex-col items-center justify-center text-[11px] font-medium text-[#2B2B2B]"
+          >
+            <Bike size={22} strokeWidth={1.8} />
+            <span className="mt-1">RIDERS</span>
+          </button>
+        </div>
+      </nav>
 
     </div>
   );
@@ -240,33 +200,22 @@ function FilterBox({
   onClick,
   color = 'gray',
 }: any) {
- const colors: any = {
-  gray: 'bg-[#E5E5E5] text-[#2B2B2B]',
-  red: 'bg-[#FFE4E1] text-[#E53935]',
-  green: 'bg-[#EAF4D3] text-[#7CB342]',
-  blue: 'bg-[#E3E7FF] text-[#5C6BC0]',
-};
+  const colors: any = {
+    gray: 'ai-filter-gray',
+    red: 'ai-filter-red',
+    green: 'ai-filter-green',
+    blue: 'ai-filter-blue',
+  };
+
+  const activeClass = active ? 'ai-filter-active' : '';
 
   return (
     <button
       onClick={onClick}
-     className={`
-  h-[74px]
-  rounded-xl
-  p-2
-  border
-  text-center
-  ${active ? 'border-[#111111]' : 'border-transparent'}
-  ${colors[color]}
-`}
-
+      className={`ai-filter-box ${colors[color]} ${activeClass}`}
     >
-     <div className="text-[20px] font-bold leading-none">
-  {value}
-</div>
-<div className="mt-1 text-[11px] font-semibold leading-tight">
-  {label}
-</div>
+      <div className="ai-filter-value">{value}</div>
+      <div className="ai-filter-label">{label}</div>
     </button>
   );
 }

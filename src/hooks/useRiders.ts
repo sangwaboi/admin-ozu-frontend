@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Rider } from "../types/rider";
 import { RidersAPI } from "../lib/api";
-import { cache, CacheKeys } from "../lib/cache";
 import { getRidersSocket } from "../lib/socket";
 
 export function useRiders(pollMs = 5000) {
@@ -10,26 +9,14 @@ export function useRiders(pollMs = 5000) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const pollRef = useRef<number | null>(null);
 
-  const refresh = useCallback(async (useCache = false) => {
-    // Load cached data immediately if available
-    if (useCache) {
-      const cached = cache.get<Rider[]>(CacheKeys.RIDERS_LIVE);
-      if (cached && cached.length > 0) {
-        setRiders(cached);
-        setLastUpdated(new Date().toISOString());
-        setLoading(false);
-      }
-    }
-
+  const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      // API will use cache if available, otherwise fetch fresh
       const data = await RidersAPI.listLive();
-      setRiders(data || []);
+      setRiders(data);
       setLastUpdated(new Date().toISOString());
     } catch (err) {
       console.error("useRiders.refresh error", err);
-      setRiders([]);
     } finally {
       setLoading(false);
     }
@@ -37,9 +24,8 @@ export function useRiders(pollMs = 5000) {
 
   // Initial fetch + polling
   useEffect(() => {
-    // Load cached data immediately, then refresh
-    refresh(true);
-    pollRef.current = window.setInterval(() => refresh(false), pollMs);
+    refresh();
+    pollRef.current = window.setInterval(refresh, pollMs);
     return () => {
       if (pollRef.current) window.clearInterval(pollRef.current);
     };
