@@ -40,30 +40,23 @@ export default function Login() {
 
         {/* FIGMA HEADING */}
         <h1
-          className="
-            text-[24px]
-            font-bold
-            leading-[120%]
-            tracking-[-0.02em]
-            text-[#111111]
-            text-center
-            mx-auto
-            w-[229px]
-            h-[58px]
-          "
+          className="su-title"
         >
-          Create Your Business Account
+          Welcome Back
         </h1>
+          <p className="su-subtitle">
+          Please enter your details
+        </p>
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
 
           <Input
             icon={<Mail />}
-            placeholder="you@company.com"
+            placeholder="Enter email ID"
             value={email}
             onChange={setEmail}
-            type="email"
+            type="email" 
           />
 
           <Input
@@ -71,7 +64,7 @@ export default function Login() {
             placeholder="Enter your password"
             value={password}
             onChange={setPassword}
-            type="password"
+            type="password" 
           />
 
           {error && (
@@ -80,33 +73,37 @@ export default function Login() {
 
           {/* LOGIN BUTTON */}
           <button
-            type="submit"
-            disabled={loading}
-            className="
-              w-full
-              h-[57px]
-              rounded-full
-              bg-[#FFCA20]
-              text-black
-              font-semibold
-              flex
-              items-center
-              justify-center
-            "
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              'Login'
-            )}
-          </button>
+  type="submit"
+  disabled={loading}
+  className="
+    w-full
+    h-[57px]
+    rounded-xl
+    bg-[#FFCA20]
+    text-black
+    font-semibold
+    flex
+    items-center
+    justify-center
+    border-none
+    cursor-pointer
+    disabled:opacity-60
+    disabled:cursor-not-allowed
+  "
+>
+  {loading ? (
+    <Loader2 className="w-5 h-5 animate-spin" />
+  ) : (
+    "Login"
+  )}
+</button>
         </form>
 
         {/* SIGNUP LINK */}
-        <p className="mt-6 text-center text-[14px] text-[#5F5F5F]">
+        <p className="mt-6 text-center text-[14px] text-[#5F5F5F] font-medium">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-[#FFCA20] font-medium">
-            Sign up
+          <Link to="/signup" className="text-[#006FFD;] font-medium">
+            Create New
           </Link>
         </p>
       </div>
@@ -133,15 +130,18 @@ function Input({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="
-          w-full
-          h-[58px]
-          pl-12
-          pr-4
-          rounded-xl
-          border
-          border-gray-200
-          text-[14px]
-        "
+    w-full
+    h-[58px]
+    font-medium
+    border-2
+    border-[#d1d5db]
+    pl-[3.5rem]
+    pr-[3.5rem]
+    rounded-xl
+    text-[15px]
+    box-border
+  "
+
         required
       />
     </div>
