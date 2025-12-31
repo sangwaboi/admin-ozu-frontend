@@ -3,6 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { RidersAPI, authenticatedFetch } from '../../lib/api';
+import type { Rider } from '../../types/rider';
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -12,22 +16,22 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom icons
-const adminIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjM0I4MkY2Ii8+PGNpcmNsZSBjeD0iMTUiIGN5PSI5IiByPSI0IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==',
+// Custom Icons: Shop, Bike, Green Pin
+const shopIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjM0I4MkY2Ii8+PHN2ZyB4PSI3IiB5PSI3IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+PHBhdGggZD0iTTMgM0gxMlYxMkgzVjNaTTE1IDNIMjFWMTJIMTVWM1pNMyAxNUgxMlYyMUgzVjE1Wk0xNSAxNUgyMVYyMUgxNVYxNVoiIGZpbGw9IndoaXRlIi8+PC9zdmc+',
+  iconSize: [30, 40],
+  iconAnchor: [15, 40],
+  popupAnchor: [0, -40],
+});
+
+const bikeIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjRkY2QjAwIi8+PHN2ZyB4PSI3IiB5PSI3IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+PHBhdGggZD0iTTUgMTJIMTlWMTBINVYxMlpNMTIgN0MxMy42NTY5IDcgMTUgOC4zNDMxNSAxNSA5QzE1IDEwLjY1NjkgMTMuNjU2OSAxMiAxMiAxMkMxMC4zNDMxIDEyIDkgMTAuNjU2OSA5IDlDOSA3LjM0MzE1IDEwLjM0MzEgNiAxMiA2QzEzLjY1NjkgNiAxNSA3LjM0MzE1IDE1IDlDMTUgMTAuNjU2OSAxMy42NTY5IDEyIDEyIDEyQzEwLjM0MzEgMTIgOSAxMC42NTY5IDkgOVoiIGZpbGw9IndoaXRlIi8+PC9zdmc+',
   iconSize: [30, 40],
   iconAnchor: [15, 40],
   popupAnchor: [0, -40],
 });
 
 const customerIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjRUYzNDM0Ii8+PGNpcmNsZSBjeD0iMTUiIGN5PSI5IiByPSI0IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==',
-  iconSize: [30, 40],
-  iconAnchor: [15, 40],
-  popupAnchor: [0, -40],
-});
-
-const riderIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjMTBCOTgxIi8+PGNpcmNsZSBjeD0iMTUiIGN5PSI5IiByPSI0IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==',
   iconSize: [30, 40],
   iconAnchor: [15, 40],
@@ -72,42 +76,122 @@ function MapUpdater({ bounds }: { bounds: L.LatLngBounds | null }) {
 
 function AllShipmentsMap() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [allRiders, setAllRiders] = useState<Rider[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [currentAdminMobile, setCurrentAdminMobile] = useState<string>('');
   const [currentAdminLocation, setCurrentAdminLocation] = useState<any>(null);
 
+  // Load admin profile and address
   useEffect(() => {
-    // Get current admin info from localStorage
-    const adminMobile = localStorage.getItem('adminMobile');
-    const adminLocation = localStorage.getItem('adminLocation');
-    
-    if (!adminMobile) {
-      alert('Please set your mobile number in the Admin Portal first');
-      navigate('/shipment');
-      return;
-    }
-    
-    setCurrentAdminMobile(adminMobile);
-    if (adminLocation) {
-      setCurrentAdminLocation(JSON.parse(adminLocation));
-    }
-    
-    fetchAllShipments(adminMobile);
-    
+    const loadAdminData = async () => {
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        // Get admin profile (mobile number)
+        const { data: profile } = await supabase
+          .from('admin_profiles')
+          .select('mobile')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!profile?.mobile) {
+          alert('Please set your mobile number in Profile Settings first');
+          navigate('/profile');
+          return;
+        }
+
+        setCurrentAdminMobile(profile.mobile);
+
+        // Get default admin address
+        const { data: addresses } = await supabase
+          .from('admin_addresses')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_default', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (addresses) {
+          setCurrentAdminLocation({
+            latitude: addresses.location_lat,
+            longitude: addresses.location_lng,
+            address: addresses.location_address,
+          });
+        }
+
+        // Fetch shipments and riders
+        await Promise.all([
+          fetchAllShipments(profile.mobile),
+          fetchAllRiders(),
+        ]);
+      } catch (error) {
+        console.error('Error loading admin data:', error);
+        alert('Failed to load profile. Please try again.');
+        navigate('/profile');
+      }
+    };
+
+    loadAdminData();
+
     // Auto-refresh every 5 seconds
-    const interval = setInterval(() => fetchAllShipments(adminMobile), 5000);
+    const interval = setInterval(() => {
+      if (currentAdminMobile) {
+        fetchAllShipments(currentAdminMobile);
+        fetchAllRiders();
+      }
+    }, 5000);
+    
     return () => clearInterval(interval);
-  }, [navigate]);
+  }, [user, navigate, currentAdminMobile]);
+
+  // Fetch all live riders
+  const fetchAllRiders = async () => {
+    try {
+      const riders = await RidersAPI.listLive();
+      // Ensure we always have an array
+      setAllRiders(Array.isArray(riders) ? riders : []);
+    } catch (error: any) {
+      console.error('Failed to fetch riders:', error);
+      // If it's a CORS error, log it but don't break the app
+      if (error?.message?.includes('CORS') || error?.message?.includes('Failed to fetch')) {
+        console.warn('CORS error fetching riders - backend needs to allow authorization header');
+      }
+      setAllRiders([]); // Set empty array on error
+    }
+  };
 
   const fetchAllShipments = async (adminMobile: string) => {
     try {
-      // Fetch only shipments for the current admin
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/shipments/active?adminMobile=${encodeURIComponent(adminMobile)}`
+      // Use authenticated fetch with proper error handling
+      const response = await authenticatedFetch(
+        `/shipments/active?adminMobile=${encodeURIComponent(adminMobile)}`
       );
+      
+      if (!response.ok) {
+        if (response.status === 403) {
+          console.error('403 Forbidden: Authentication failed or insufficient permissions');
+          setLoading(false);
+          return;
+        }
+        throw new Error(`${response.status} ${response.statusText}`);
+      }
+      
       const data = await response.json();
+      
+      // Handle non-array responses (error objects)
+      if (!Array.isArray(data)) {
+        console.error('API returned non-array response:', data);
+        setShipments([]);
+        setLoading(false);
+        return;
+      }
       
       // Parse customer locations and fetch rider locations
       const shipmentsWithLocations = await Promise.all(
@@ -176,7 +260,7 @@ function AllShipmentsMap() {
       points.push([currentAdminLocation.latitude, currentAdminLocation.longitude]);
     }
     
-    // Add all customer and rider locations
+    // Add all customer locations
     shipments.forEach((shipment) => {
       if (shipment.customer.lat && shipment.customer.lng) {
         points.push([shipment.customer.lat, shipment.customer.lng]);
@@ -184,6 +268,11 @@ function AllShipmentsMap() {
       if (shipment.acceptedRider) {
         points.push([shipment.acceptedRider.location.lat, shipment.acceptedRider.location.lng]);
       }
+    });
+
+    // Add all rider locations
+    allRiders.forEach((rider) => {
+      points.push([rider.lat, rider.lng]);
     });
 
     if (points.length > 0) {
@@ -332,11 +421,11 @@ function AllShipmentsMap() {
             {currentAdminLocation && (
               <Marker
                 position={[currentAdminLocation.latitude, currentAdminLocation.longitude]}
-                icon={adminIcon}
+                icon={shopIcon}
               >
                 <Popup maxWidth={300}>
                   <div className="text-sm">
-                    <div className="font-bold text-blue-600 mb-2">Your Shop Location</div>
+                    <div className="font-bold text-blue-600 mb-2">🏪 Your Shop</div>
                     <div className="space-y-1">
                       <p className="text-xs text-gray-600">{currentAdminLocation.address}</p>
                       <p className="text-xs"><strong>Mobile:</strong> {currentAdminMobile}</p>
@@ -346,6 +435,37 @@ function AllShipmentsMap() {
                 </Popup>
               </Marker>
             )}
+
+            {/* All Riders Markers - Show all live riders */}
+            {allRiders.map((rider) => (
+              <Marker
+                key={rider.id}
+                position={[rider.lat, rider.lng]}
+                icon={bikeIcon}
+              >
+                <Popup maxWidth={300}>
+                  <div className="text-sm">
+                    <div className="font-bold text-orange-600 mb-2">🏍️ {rider.name}</div>
+                    <div className="space-y-1">
+                      <p className="text-xs"><strong>Status:</strong> {rider.status}</p>
+                      {rider.phone && (
+                        <p className="text-xs"><strong>Phone:</strong> {rider.phone}</p>
+                      )}
+                      {rider.activeShipmentId && (
+                        <p className="text-xs text-blue-600">
+                          <strong>Active Shipment:</strong> #{rider.activeShipmentId}
+                        </p>
+                      )}
+                      {rider.updatedAt && (
+                        <p className="text-xs text-gray-500">
+                          Updated: {new Date(rider.updatedAt).toLocaleTimeString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
 
             {/* Render all shipments on map */}
             {shipments.map((shipment) => (
@@ -358,33 +478,32 @@ function AllShipmentsMap() {
                   >
                     <Popup maxWidth={300}>
                       <div className="text-sm">
-                        <div className="font-bold text-red-600 mb-2">Customer</div>
+                        <div className="font-bold text-green-600 mb-2">📍 {shipment.customer.name}</div>
                         <div className="space-y-1">
-                          <p className="text-xs"><strong>Name:</strong> {shipment.customer.name}</p>
                           <p className="text-xs"><strong>Mobile:</strong> {shipment.customer.mobile}</p>
                           <p className="text-xs"><strong>Address:</strong> {shipment.customer.address}</p>
                           <p className="text-xs"><strong>Landmark:</strong> {shipment.customer.landmark}</p>
-                          <p className="text-xs font-semibold text-green-600 mt-2">Fee: ₹{shipment.deliveryPrice}</p>
+                          <p className="text-xs font-semibold text-green-600 mt-2">💰 Fee: ₹{shipment.deliveryPrice}</p>
                         </div>
                       </div>
                     </Popup>
                   </Marker>
                 )}
 
-                {/* Rider Marker */}
+                {/* Rider Marker (for accepted shipment) */}
                 {shipment.acceptedRider && (
                   <Marker
                     position={[shipment.acceptedRider.location.lat, shipment.acceptedRider.location.lng]}
-                    icon={riderIcon}
+                    icon={bikeIcon}
                   >
                     <Popup maxWidth={300}>
                       <div className="text-sm">
-                        <div className="font-bold text-green-600 mb-2">Rider</div>
+                        <div className="font-bold text-orange-600 mb-2">🏍️ {shipment.acceptedRider.name}</div>
                         <div className="space-y-1">
-                          <p className="text-xs"><strong>Name:</strong> {shipment.acceptedRider.name}</p>
                           <p className="text-xs"><strong>Mobile:</strong> {shipment.acceptedRider.mobile}</p>
                           <p className="text-xs"><strong>Status:</strong> {shipment.status}</p>
-                          <p className="text-xs text-gray-500 mt-2">Location updating live...</p>
+                          <p className="text-xs"><strong>Shipment:</strong> #{shipment.id}</p>
+                          <p className="text-xs text-gray-500 mt-2">📍 Location updating live...</p>
                         </div>
                       </div>
                     </Popup>
@@ -427,16 +546,16 @@ function AllShipmentsMap() {
             <h3 className="text-sm font-semibold text-gray-900 mb-2">Map Legend</h3>
             <div className="space-y-2 text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
+                <span className="text-lg">🏪</span>
                 <span className="text-gray-700">Shop Location</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                <span className="text-gray-700">Customer</span>
+                <span className="text-lg">🏍️</span>
+                <span className="text-gray-700">Rider ({allRiders.length})</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                <span className="text-gray-700">Rider</span>
+                <span className="text-lg">📍</span>
+                <span className="text-gray-700">Customer</span>
               </div>
             </div>
           </div>

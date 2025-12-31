@@ -12,22 +12,22 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom icons
-const adminIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjM0I4MkY2Ii8+PGNpcmNsZSBjeD0iMTUiIGN5PSI5IiByPSI0IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==',
+// Custom Icons: Shop, Bike, Green Pin
+const shopIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjM0I4MkY2Ii8+PHN2ZyB4PSI3IiB5PSI3IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+PHBhdGggZD0iTTMgM0gxMlYxMkgzVjNaTTE1IDNIMjFWMTJIMTVWM1pNMyAxNUgxMlYyMUgzVjE1Wk0xNSAxNUgyMVYyMUgxNVYxNVoiIGZpbGw9IndoaXRlIi8+PC9zdmc+',
+  iconSize: [30, 40],
+  iconAnchor: [15, 40],
+  popupAnchor: [0, -40],
+});
+
+const bikeIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjRkY2QjAwIi8+PHN2ZyB4PSI3IiB5PSI3IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+PHBhdGggZD0iTTUgMTJIMTlWMTBINVYxMlpNMTIgN0MxMy42NTY5IDcgMTUgOC4zNDMxNSAxNSA5QzE1IDEwLjY1NjkgMTMuNjU2OSAxMiAxMiAxMkMxMC4zNDMxIDEyIDkgMTAuNjU2OSA5IDlDOSA3LjM0MzE1IDEwLjM0MzEgNiAxMiA2QzEzLjY1NjkgNiAxNSA3LjM0MzE1IDE1IDlDMTUgMTAuNjU2OSAxMy42NTY5IDEyIDEyIDEyQzEwLjM0MzEgMTIgOSAxMC42NTY5IDkgOVoiIGZpbGw9IndoaXRlIi8+PC9zdmc+',
   iconSize: [30, 40],
   iconAnchor: [15, 40],
   popupAnchor: [0, -40],
 });
 
 const customerIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjRUYzNDM0Ii8+PGNpcmNsZSBjeD0iMTUiIGN5PSI5IiByPSI0IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==',
-  iconSize: [30, 40],
-  iconAnchor: [15, 40],
-  popupAnchor: [0, -40],
-});
-
-const riderIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgMEMxMC4wMjk0IDAgNiA0LjAyOTQzIDYgOUM2IDEzLjQ3MDYgMTUgMzAgMTUgMzBDMTUgMzAgMjQgMTMuNDcwNiAyNCA5QzI0IDQuMDI5NDMgMTkuOTcwNiAwIDE1IDBaIiBmaWxsPSIjMTBCOTgxIi8+PGNpcmNsZSBjeD0iMTUiIGN5PSI5IiByPSI0IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==',
   iconSize: [30, 40],
   iconAnchor: [15, 40],
@@ -139,16 +139,16 @@ function LiveTrackingMap({ adminLocation, shipment }: LiveTrackingMapProps) {
         <h3 className="text-lg font-semibold text-gray-900">Live Tracking</h3>
         <div className="mt-2 flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1">
-            <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-            <span className="text-gray-600">Admin (You)</span>
+            <span className="text-base">🏪</span>
+            <span className="text-gray-600">Shop</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-            <span className="text-gray-600">Customer</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+            <span className="text-base">🏍️</span>
             <span className="text-gray-600">Rider</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-base">📍</span>
+            <span className="text-gray-600">Customer</span>
           </div>
         </div>
       </div>
@@ -167,15 +167,15 @@ function LiveTrackingMap({ adminLocation, shipment }: LiveTrackingMapProps) {
 
           <MapUpdater bounds={bounds} />
 
-          {/* Admin Marker */}
+          {/* Admin/Shop Marker */}
           {adminLocation && (
             <Marker
               position={[adminLocation.latitude, adminLocation.longitude]}
-              icon={adminIcon}
+              icon={shopIcon}
             >
               <Popup>
                 <div className="text-sm">
-                  <strong className="text-blue-600">Your Shop</strong>
+                  <strong className="text-blue-600">🏪 Your Shop</strong>
                   <p className="text-xs text-gray-600 mt-1">{adminLocation.address}</p>
                 </div>
               </Popup>
@@ -190,7 +190,7 @@ function LiveTrackingMap({ adminLocation, shipment }: LiveTrackingMapProps) {
             >
               <Popup>
                 <div className="text-sm">
-                  <strong className="text-red-600">Customer</strong>
+                  <strong className="text-green-600">📍 Customer</strong>
                   <p className="text-xs text-gray-600 mt-1">{shipment?.customer?.name}</p>
                   <p className="text-xs text-gray-500">{shipment?.customer?.landmark}</p>
                 </div>
@@ -202,11 +202,11 @@ function LiveTrackingMap({ adminLocation, shipment }: LiveTrackingMapProps) {
           {riderLocation && (
             <Marker
               position={[riderLocation.lat, riderLocation.lng]}
-              icon={riderIcon}
+              icon={bikeIcon}
             >
               <Popup>
                 <div className="text-sm">
-                  <strong className="text-green-600">Rider</strong>
+                  <strong className="text-orange-600">🏍️ Rider</strong>
                   <p className="text-xs text-gray-600 mt-1">On the way...</p>
                 </div>
               </Popup>

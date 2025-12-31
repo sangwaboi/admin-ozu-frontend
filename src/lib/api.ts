@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { cache, CacheKeys, CacheTTL } from './cache';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL || "https://ozu-source-code.onrender.com/api";
 
@@ -25,7 +26,19 @@ export async function apiGet<T>(path: string, init?: RequestInit): Promise<T> {
       ...init?.headers,
     },
   });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  
+  if (!res.ok) {
+    // Try to get error details
+    let errorMessage = `${res.status} ${res.statusText}`;
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.detail || errorData.message || errorMessage;
+    } catch {
+      // If response is not JSON, use status text
+    }
+    throw new Error(errorMessage);
+  }
+  
   return res.json();
 }
 
@@ -55,7 +68,26 @@ export function getBaseUrl() {
 
 // Riders endpoints (adjust to your FastAPI routes if needed)
 export const RidersAPI = {
-  listLive: () => apiGet<import("../types/rider").Rider[]>("/riders/live"),
+  listLive: async (): Promise<import("../types/rider").Rider[]> => {
+    const cacheKey = CacheKeys.RIDERS_LIVE;
+    const cached = cache.get(cacheKey);
+    if (cached && Array.isArray(cached)) return cached as import("../types/rider").Rider[];
+    
+    try {
+      const data = await apiGet<import("../types/rider").Rider[]>("/riders/live");
+      // Ensure response is an array
+      const riders = Array.isArray(data) ? data : [];
+      cache.set(cacheKey, riders, CacheTTL.RIDERS);
+      return riders;
+    } catch (error: any) {
+      // If CORS or network error, return empty array
+      if (error?.message?.includes('CORS') || error?.message?.includes('Failed to fetch')) {
+        console.warn('CORS error fetching riders - returning empty array');
+        return [];
+      }
+      throw error;
+    }
+  },
   
   // Rider Approval endpoints
   getPending: async () => {
@@ -127,10 +159,47 @@ export const ShipmentAPI = {
   },
   
   // Updated to use authenticated endpoints (no mobile parameter needed)
-  getActive: async () => {
-    const response = await authenticatedFetch('/shipments/active');
-    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-    return response.json();
+  getActive: async (adminMobile?: string) => {
+    const cacheKey = CacheKeys.SHIPMENTS_ACTIVE(adminMobile);
+    const cached = cache.get(cacheKey);
+    if (cached && Array.isArray(cached)) return cached;
+    
+    try {
+      // Use adminMobile in query if provided (for backward compatibility)
+      const url = adminMobile 
+        ? `/shipments/active?adminMobile=${encodeURIComponent(adminMobile)}`
+        : '/shipments/active';
+      
+      const response = await authenticatedFetch(url);
+      
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('403 Forbidden: Authentication failed or insufficient permissions');
+        }
+        let errorMessage = `${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorData.message || errorMessage;
+        } catch {
+          // If response is not JSON, use status text
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const data = await response.json();
+      
+      // Ensure response is an array
+      const shipments = Array.isArray(data) ? data : [];
+      cache.set(cacheKey, shipments, CacheTTL.SHIPMENTS_ACTIVE);
+      return shipments;
+    } catch (error: any) {
+      // If it's a network/CORS error, return empty array instead of breaking
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('CORS')) {
+        console.warn('Network error fetching shipments - returning empty array');
+        return [];
+      }
+      throw error;
+    }
   },
   
   getCompleted: async () => {
