@@ -1,0 +1,210 @@
+/* Overlay for both booking and rider popups */
+.sf-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 40;
+}
+
+/* Booking popup container */
+.sf-popup {
+  background: #fff;
+  width: 100%;
+  max-width: 440px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding:0px;
+  padding-top: 0px;
+  padding-bottom: 24px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* Title */
+.sf-title-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: aliceblue;
+}
+
+.sf-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Form spacing */
+.sf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0px 16px;
+}
+
+/* Inputs */
+.sf-input {
+ width: 100%;
+  height: 58px;
+  border-radius: 12px;
+  /* border: 1px solid #E0E0E0; */
+  font-weight: 500;            /* font-medium */
+  border-width: 2px;
+  border-style: solid;
+  border-color: #d1d5db; 
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  gap: 12px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.sf-input-error {
+  border-color: #f87171; /* red-400 */
+}
+
+/* Terms */
+.sf-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.sf-terms-checkbox {
+  margin-top: 4px;
+}
+
+.sf-terms-text {
+  color: #4b5563; /* gray-600 */
+}
+
+.sf-link {
+ color: #006FFD;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.sf-terms-error {
+  font-size: 12px;
+  color: #ef4444; /* red-500 */
+}
+
+/* Buttons */
+.sf-btn {
+
+  cursor: pointer;
+  border: none;
+    width: 100%;
+  height: 57px;
+  border-radius: 12px;        /* rounded-xl */
+  background-color: #FFCA20;
+  color: #000000;
+  font-weight: 600;          /* font-semibold */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sf-btn-confirm {
+  background: #FFCA28;
+  font-weight: 600;
+}
+
+.sf-btn-secondary {
+  background: #e5e7eb; /* gray-200 */
+}
+
+.sf-btn-cancel {
+  border: 1px solid #d1d5db; /* gray-300 */
+  background: #fff;
+}
+
+.sf-btn-send {
+  background: #2563eb; /* blue-600 */
+  color: #fff;
+}
+
+.sf-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Rider popup */
+.sf-rider-popup {
+  background: #fff;
+  width: 100%;
+  max-width: 480px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 16px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.sf-rider-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.sf-rider-loading {
+  text-align: center;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.sf-rider-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sf-rider-item {
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sf-rider-item:hover {
+  background: #f9fafb;
+}
+
+.sf-rider-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.sf-rider-name {
+  font-weight: 500;
+}
+
+.sf-rider-mobile {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Rider actions */
+.sf-rider-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.sf-rider-actions .sf-btn {
+  flex: 1;
+  border-radius: 8px;
+  height: auto;
+  padding: 8px 0;
+}
+
+.support-text{font-size: 75%;font-weight: 200;letter-spacing: 0.5px;font-style: italic;margin-top: -1em;}

@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
-import { cache, CacheKeys, CacheTTL } from "../../lib/cache";
 import AddressManager from "../../components/AddressManager";
 import Lottie from "lottie-react";
 import riderAnimation from "@/assets/loader-rider.json";
-import { Pencil } from 'lucide-react';
+import { Pencil } from "lucide-react";
 
 import {
   ArrowLeft,
@@ -15,6 +14,8 @@ import {
   LogOut,
   QrCode,
 } from "lucide-react";
+
+import "./AdminProfile.css";
 
 interface AdminProfile {
   mobile: string;
@@ -41,8 +42,6 @@ export default function AdminProfile() {
     shopName: "",
   });
 
-  /* ================= LOAD PROFILE (UNCHANGED) ================= */
-
   useEffect(() => {
     if (user) loadProfile();
   }, [user]);
@@ -52,21 +51,6 @@ export default function AdminProfile() {
     setIsLoading(true);
 
     try {
-      // Check cache first
-      const cacheKey = CacheKeys.ADMIN_PROFILE(user.id);
-      const cached = cache.get<{ mobile: string; name: string; shop_name?: string }>(cacheKey);
-      
-      if (cached) {
-        setProfile({
-          mobile: cached.mobile,
-          name: cached.name,
-          shopName: cached.shop_name || "",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Fetch from Supabase
       const { data, error } = await supabase
         .from("admin_profiles")
         .select("*")
@@ -76,19 +60,11 @@ export default function AdminProfile() {
       if (error && error.code !== "PGRST116") throw error;
 
       if (data) {
-        const profileData = {
+        setProfile({
           mobile: data.mobile,
           name: data.name,
           shopName: data.shop_name || "",
-        };
-        setProfile(profileData);
-        
-        // Cache the profile data
-        cache.set(cacheKey, {
-          mobile: data.mobile,
-          name: data.name,
-          shop_name: data.shop_name || null,
-        }, CacheTTL.PROFILE);
+        });
       }
     } catch {
       setMessage({ type: "error", text: "Failed to load profile" });
@@ -96,8 +72,6 @@ export default function AdminProfile() {
       setIsLoading(false);
     }
   };
-
-  /* ================= SAVE (UNCHANGED) ================= */
 
   const handleSave = async () => {
     if (!user) return;
@@ -128,19 +102,11 @@ export default function AdminProfile() {
 
       if (error) throw error;
 
-      // Invalidate cache
-      if (user) {
-        cache.remove(CacheKeys.ADMIN_PROFILE(user.id));
-      }
-
       setMessage({
         type: "success",
         text: "✅ Profile saved successfully!",
       });
       setIsEditOpen(false);
-      
-      // Reload profile to update cache
-      loadProfile();
     } catch {
       setMessage({
         type: "error",
@@ -158,13 +124,13 @@ export default function AdminProfile() {
 
   function RiderLoading() {
     return (
-      <div className="loading-screen">
+      <div className="ap-loading-screen">
         <Lottie
           animationData={riderAnimation}
           loop
           style={{ width: 180, height: 180 }}
         />
-        <p className="loading-text">Loading riders…</p>
+        <p className="ap-loading-text">Loading riders…</p>
       </div>
     );
   }
@@ -174,87 +140,65 @@ export default function AdminProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-white font-[DM Sans]">
-      {/* ================= HEADER ================= */}
-      <div className="px-4 pt-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/shipment")}>
+    <div className="ap-root">
+      {/* HEADER */}
+      <div className="ap-header px-4 pt-4 flex items-center justify-between">
+        <div className="ap-header-left flex items-center gap-3">
+          <button className="ap-back-btn" onClick={() => navigate("/shipment")}>
             <ArrowLeft />
           </button>
-           {/* OZU LOGO */}
-  {/* OZU LOGO */}
-<div className="w-[109px] h-[46px] flex items-center">
-  <img
-    src="/ozu-logo.png"
-    alt="OZU"
-    className="h-[32px] w-auto object-contain"
-  />
-</div>
 
+          <div className="ap-logo-wrap w-[109px] h-[46px] flex items-center">
+            <img
+              src="/ozu-logo.png"
+              alt="OZU"
+              className="ap-logo-img h-[32px] w-auto object-contain"
+            />
+          </div>
         </div>
 
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2 text-sm border px-3 py-1.5 rounded"
+          className="ap-signout-btn flex items-center gap-2 text-sm border px-3 py-1.5 rounded"
         >
           <LogOut size={16} />
           Sign Out
         </button>
       </div>
 
-      {/* ================= PROFILE ================= */}
-      <div className="px-4 mt-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      {/* PROFILE */}
+      <div className="ap-profile px-4 mt-4 flex items-center justify-between">
+        <div className="ap-profile-left flex items-center gap-3">
           <img
             src="/ava2.png"
             alt="Avatar"
-            className="w-[64px] h-[64px] rounded-full"
+            className="ap-avatar w-[64px] h-[64px] rounded-full"
           />
           <div>
-            <p className="text-[16px] font-semibold text-black">
+            <p className="ap-name text-[16px] font-semibold text-black">
               {profile.name}
             </p>
-            <p className="text-[12px] text-gray-500">Joined : 15 Dec 2025</p>
+            <p className="ap-joined text-[12px] text-gray-500">
+              Joined : 15 Dec 2025
+            </p>
           </div>
         </div>
 
- 
-
-<button
-  onClick={() => setIsEditOpen(true)}
-  className="
-    w-[101px]
-    h-[32px]
-    flex
-    items-center
-    justify-center
-    gap-2
-    rounded-[8px]
-    border
-    border-[#EAE6E6]
-    bg-[#F3F3F3]
-    font-['DM_Sans']
-    text-[14px]
-    font-normal
-    tracking-normal
-    normal-case
-    text-black
-  "
->
-  <Pencil className="w-4 h-4 text-black" />
-  Edit
-</button>
-
+        <button
+          onClick={() => setIsEditOpen(true)}
+          className="ap-edit-btn w-[101px] h-[32px] flex items-center justify-center gap-2 rounded-[8px] border border-[#EAE6E6] bg-[#F3F3F3] text-[14px] text-black"
+        >
+          <Pencil className="w-4 h-4 text-black" />
+          Edit
+        </button>
       </div>
 
-      {/* ================= MESSAGE ================= */}
+      {/* MESSAGE */}
       {message && (
-        <div className="px-4 mt-4">
+        <div className="ap-message px-4 mt-4">
           <div
-            className={`flex items-center gap-2 p-3 rounded ${
-              message.type === "success"
-                ? "bg-green-50 text-green-800"
-                : "bg-red-50 text-red-800"
+            className={`ap-message-box flex items-center gap-2 p-3 rounded ${
+              message.type === "success" ? "ap-msg-success" : "ap-msg-error"
             }`}
           >
             {message.type === "success" ? (
@@ -266,60 +210,59 @@ export default function AdminProfile() {
           </div>
         </div>
       )}
-      <div className="mx-auto mt-5 w-full max-w-[410px] px-4">
 
-      {/* ================= INVITE RIDERS CARD ================= */}
-      <div className=" mt-5 w-full h-[192px] rounded-[16px] border border-[#E3E3E3] bg-[#EFEFEF] px-6 py-6 flex flex-col items-center justify-center text-center">
-        <p
-          className="mx-auto w-full max-w-[339px] h-[26px] font-[DM Sans] text-[22px] font-bold leading-[120%] tracking-[-0.02em] text-center text-black"
-        >
-          Invite Riders to your shop
-        </p>
-        <p className="mt-1 text-[13px]  font-bold leading-[120%] text-gray-600">
-          Send this unique QR code to rider
-        </p>
+      <div className="ap-center">
+        {/* INVITE RIDERS CARD */}
+        <div className="ap-invite-card mt-5 w-full h-[192px] rounded-[16px] border border-[#E3E3E3] bg-[#EFEFEF] px-6 py-6 flex flex-col items-center justify-center text-center">
+          <p className="ap-invite-title mx-auto w-full max-w-[339px] h-[26px] text-[22px] font-bold leading-[120%] tracking-[-0.02em] text-center text-black">
+            Invite Riders to your shop
+          </p>
+          <p className="ap-invite-sub mt-1 text-[13px] font-bold leading-[120%] text-gray-600">
+            Send this unique QR code to rider
+          </p>
 
-        <button
-          onClick={() => navigate("/tenant-settings")}
-          className="mx-auto mt-4 flex h-[60px] w-full max-w-[301.36px] items-center justify-center rounded-full border border-[#FFDBD8] bg-[#FFCA28] font-semibold text-black"
-        >
-          <QrCode className="mr-2 h-4 w-4" />
-          View Join Code
-        </button>
+          <button
+            onClick={() => navigate("/tenant-settings")}
+            className="ap-join-btn mx-auto mt-4 flex h-[60px] w-full max-w-[301.36px] items-center justify-center rounded-full border border-[#FFDBD8] bg-[#FFCA28] font-semibold text-black"
+          >
+            <QrCode className="mr-2 h-4 w-4" />
+            View Join Code
+          </button>
+        </div>
+
+        {/* ADDRESS MANAGER */}
+        <div className="mt-4">
+          <AddressManager />
+        </div>
       </div>
 
-      {/* ================= ADDRESS MANAGER ================= */}
-      <div className="mt-4">
-        <AddressManager />
-      </div>
-      </div>
       {/* FOOTER TEXT */}
-      <div className="mt-6 flex justify-center">
+      <div className="ap-footer-text mt-6 flex justify-center">
         <p className="text-[12px] text-gray-500">
           Made with <span className="text-red-500">❤️</span> in India
         </p>
       </div>
 
-      {/* ================= FOOTER IMAGE ================= */}
+      {/* FOOTER IMAGE */}
       <img
         src="/7606758_3700324.jpg"
         alt="Delivery"
-        className="mt-6 w-full opacity-20"
+        className="ap-footer-image mt-6 w-full opacity-20"
       />
 
-      {/* ================= EDIT PROFILE POPUP ================= */}
+      {/* EDIT PROFILE POPUP */}
       {isEditOpen && (
         <>
-          <div className="fixed inset-0 bg-black/60 z-40" />
+          <div className="ap-backdrop fixed inset-0 bg-black/60 z-40" />
 
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="w-full max-w-[440px] h-[521px] bg-white rounded-[20px] p-6">
+          <div className="ap-modal-wrap fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="ap-modal w-full max-w-[440px] h-[521px] bg-white rounded-[20px] p-6">
               <h2 className="text-center font-semibold text-[16px] mb-5">
                 Basic Information
               </h2>
 
               <input
-                className="w-full h-[52px] border rounded-xl px-4 mb-4"
+                className="ap-input w-full h-[52px] border rounded-xl px-4 mb-4"
                 placeholder="Your Name"
                 value={profile.name}
                 onChange={(e) =>
@@ -328,7 +271,7 @@ export default function AdminProfile() {
               />
 
               <input
-                className="w-full h-[52px] border rounded-xl px-4 mb-4"
+                className="ap-input w-full h-[52px] border rounded-xl px-4 mb-4"
                 placeholder="+91 Phone Number"
                 value={profile.mobile}
                 onChange={(e) =>
@@ -337,13 +280,13 @@ export default function AdminProfile() {
               />
 
               <input
-                className="w-full h-[52px] border rounded-xl px-4 mb-4 bg-gray-100"
+                className="ap-input w-full h-[52px] border rounded-xl px-4 mb-4 bg-gray-100"
                 value={user?.email || ""}
                 disabled
               />
 
               <input
-                className="w-full h-[52px] border rounded-xl px-4 mb-6"
+                className="ap-input w-full h-[52px] border rounded-xl px-4 mb-6"
                 placeholder="Store Name (Optional)"
                 value={profile.shopName || ""}
                 onChange={(e) =>
@@ -354,14 +297,14 @@ export default function AdminProfile() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="w-full h-[52px] bg-[#FFCA28] rounded-full font-semibold"
+                className="ap-save-btn w-full h-[52px] bg-[#FFCA28] rounded-full font-semibold"
               >
                 {isSaving ? "Saving…" : "Done"}
               </button>
 
               <button
                 onClick={() => setIsEditOpen(false)}
-                className="w-full mt-3 text-[14px] text-gray-500"
+                className="ap-cancel-btn w-full mt-3 text-[14px] text-gray-500"
               >
                 Cancel
               </button>

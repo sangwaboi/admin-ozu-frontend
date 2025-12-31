@@ -215,7 +215,7 @@ export default function LocationSearchInput({
         )}
         
         <div className="relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <div className="absolute right-4 bg-white top-1/2 -translate-y-1/2 text-gray-400">
             {isLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
@@ -229,7 +229,7 @@ export default function LocationSearchInput({
             onChange={handleInputChange}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             placeholder={placeholder}
-            className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`su-input left-3 ${
               error ? 'border-red-500' : 'border-gray-300'
             }`}
           />

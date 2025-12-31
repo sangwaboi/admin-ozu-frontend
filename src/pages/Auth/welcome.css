@@ -1,3 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Stack+Sans+Text:wght@200..700&display=swap');
+
+body{ 
+    font-family: "DM Sans", sans-serif;
+  font-optical-sizing: auto;
+}
+
 /* ===== MOBILE FIRST BACKGROUND ===== */
 .welcome-bg {
   min-height: 100vh;
@@ -15,7 +22,7 @@
 .welcome-container {
   width: 100%;
   max-width: 430px; /* iPhone Pro Max */
-  padding: 48px 24px 32px;
+  padding: 100px 24px 32px;
   text-align: center;
 }
 
@@ -29,7 +36,8 @@
   align-items: center;
   justify-content: center;
 
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+   font-family: "DM Sans", sans-serif;
+   font-optical-sizing: auto;
   font-size: 36px;
   font-weight: 800;
   letter-spacing: -1px;
@@ -41,19 +49,20 @@
   max-width: 313px;
   margin: 0 auto 32px;
 
-  font-family: 'DM Sans', system-ui, sans-serif;
+   font-family: "DM Sans", sans-serif;
+   font-optical-sizing: auto;
   font-size: 20px;
   font-weight: 500;
   line-height: 120%;
-  letter-spacing: -1%;
-  color: #111111;
+  letter-spacing: -0.5px;
+  color: #1e1e1e;
 }
 
 /* ===== ILLUSTRATION ===== */
 .welcome-illustration {
-  width: 216px;
-  height: 216px;
-  margin: 0 auto 40px;
+  width: 200px;
+ 
+  margin: 40px auto 40px;
   display: block;
 }
 
@@ -68,12 +77,12 @@
 .btn-main {
   width: 100%;
   height: 56px;
-
+letter-spacing: 0.5px;
   background: #000000;
   color: #ffffff;
 
   border-radius: 20px;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
 
   display: flex;
@@ -90,11 +99,11 @@
   background: #f2f2f2;
   color: #000000;
 
-  border: 1.5px solid #000000;
+  border: 2px solid #000000;
   border-radius: 20px;
 
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 17px;
+  font-weight: 600;
 
   display: flex;
   align-items: center;

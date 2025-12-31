@@ -13,6 +13,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
+import './Signup.css';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -30,7 +31,6 @@ export default function Signup() {
   const [agree, setAgree] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (field: string, value: string) => {
@@ -81,38 +81,38 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F9FAFB] to-white px-4 font-['DM Sans']">
-      <div className="max-w-md mx-auto flex flex-col items-center pt-20">
+    <div className="su-root">
+      <div className="su-card">
+        <img src="/hands_2.png" alt="Welcome" className="su-illustration" />
 
-        {/* Illustration */}
-        <img
-          src="/hands_2.png"
-          alt="Welcome"
-          className="w-[77px] h-[138px] object-contain mb-6"
-        />
-
-        {/* Heading */}
-        <h1 className="text-[24px] font-bold text-[#111111] text-center">
-          Welcome to OZU
-        </h1>
-        <p className="text-[20px] font-semibold text-[#5F5F5F] text-center mt-2">
+        <h1 className="su-title">Welcome to OZU</h1>
+        <p className="su-subtitle">
           Connect Your Store
           <br />
           Get control on your deliveries
         </p>
 
-        <form onSubmit={handleSubmit} className="w-full mt-10 space-y-3">
-
+        <form onSubmit={handleSubmit} className="su-form">
           <Input
             icon={<Phone size={18} />}
-            placeholder="+91 98765 43210"
+            placeholder="Your Mobile Nuber"
             value={formData.mobile}
-            onChange={v => handleChange('mobile', v)}
+           inputMode="numeric"
+            maxLength={10}
+            onChange={v => {
+              // keep only digits
+              const digitsOnly = v.replace(/\D/g, '');
+
+              // limit to 10 digits
+              const value = digitsOnly.slice(0, 10);
+
+              handleChange('mobile', value);
+            }}
           />
 
           <Input
             icon={<Store size={18} />}
-            placeholder="ABC Store"
+            placeholder="Business Name"
             value={formData.shopName}
             onChange={v => handleChange('shopName', v)}
           />
@@ -126,13 +126,12 @@ export default function Signup() {
 
           <Input
             icon={<Mail size={18} />}
-            placeholder="name@email.com"
+            placeholder="Enter email ID"
             value={formData.email}
             onChange={v => handleChange('email', v)}
             type="email"
           />
 
-          {/* PASSWORD WITH EYE */}
           <Input
             icon={<Lock size={18} />}
             placeholder="Create a password"
@@ -143,14 +142,14 @@ export default function Signup() {
               <button
                 type="button"
                 onClick={() => setShowPassword(p => !p)}
-                className="text-[#9E9E9E]"
+                className="su-eye-btn"
+                aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             }
           />
 
-          {/* CONFIRM PASSWORD (NO EYE) */}
           <Input
             icon={<Lock size={18} />}
             placeholder="Confirm password"
@@ -159,41 +158,38 @@ export default function Signup() {
             type="password"
           />
 
-          {/* TERMS */}
-          <div className="flex items-start gap-3 mt-2">
+          <div className="su-terms">
             <input
               type="checkbox"
               checked={agree}
               onChange={e => setAgree(e.target.checked)}
-              className="mt-1 h-4 w-4"
+              className="su-checkbox"
             />
-            <p className="text-xs text-gray-600">
-              I agree to the{' '}
-              <span className="text-[#FFCA20] underline">Terms</span> and{' '}
-              <span className="text-[#FFCA20] underline">Privacy Policy</span>
+            <p className="su-terms-text">
+              I've read and agree with the <span className="su-link">Terms and Conditions</span> and the <span className="su-link">Privacy Policy</span>
             </p>
           </div>
 
           {error && (
-            <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3">
-              <AlertCircle size={18} className="text-red-600" />
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="su-error">
+              <AlertCircle size={18} className="su-error-icon" />
+              <p className="su-error-text">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-[58px] rounded-[20px] bg-[#FFCA20] font-semibold flex justify-center items-center gap-2"
+            className="su-primary-btn"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin" size={18} />
+                <Loader2 className="su-spinner" size={18} />
                 Creating...
               </>
             ) : (
               <>
-                <UserPlus size={18} />
+                
                 Get Started
               </>
             )}
@@ -202,21 +198,19 @@ export default function Signup() {
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="w-full h-[58px] rounded-[20px] bg-[#EFEFEF] text-[#B0B0B0]"
+            className="su-secondary-btn"
           >
-            Login
+            Already registered? Login
           </button>
         </form>
 
-        <p className="mt-6 text-xs text-gray-400 text-center">
-          © {new Date().getFullYear()} Ozu Admin
-        </p>
+        <p className="su-footer">© {new Date().getFullYear()} Ozu Admin</p>
       </div>
     </div>
   );
 }
 
-/* ---------- INPUT ---------- */
+/* ---------- INPUT COMPONENT ---------- */
 function Input({
   icon,
   placeholder,
@@ -233,16 +227,16 @@ function Input({
   rightIcon?: React.ReactNode;
 }) {
   return (
-    <div className="w-full h-[58px] rounded-[20px] border border-[#E0E0E0] px-4 flex items-center gap-3 bg-white">
-      <div className="text-[#9E9E9E]">{icon}</div>
+    <div className="su-input">
+      <div className="su-input-icon">{icon}</div>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 outline-none text-[14px]"
+        className="su-input-field"
       />
-      {rightIcon && <div>{rightIcon}</div>}
+      {rightIcon && <div className="su-input-right">{rightIcon}</div>}
     </div>
   );
 }
