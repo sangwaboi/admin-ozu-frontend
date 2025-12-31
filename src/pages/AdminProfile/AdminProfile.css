@@ -1,0 +1,261 @@
+/* Root */
+.ap-root {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+
+    width: 100%;
+  max-width: 35%;
+  margin: 0 auto;
+}
+
+/* Header */
+.ap-header {
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 16px;
+}
+
+.ap-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ap-back-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Logo */
+.ap-logo-wrap {
+  width: 109px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+}
+
+.ap-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Sign out button */
+.ap-signout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Profile section */
+.ap-profile {
+  padding-left: 0;
+  padding-right: 0;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ap-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+.ap-name {
+  margin: 0;
+}
+
+.ap-joined {
+  margin: 0;
+}
+
+/* Edit button */
+.ap-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 101px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #EAE6E6;
+  background: #F3F3F3;
+  cursor: pointer;
+}
+
+/* Message */
+.ap-message {
+  padding-left: 0;
+  padding-right: 0;
+  margin-top: 16px;
+}
+
+.ap-message-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.ap-msg-success {
+  background: #ECFDF5;
+  color: #065F46;
+}
+
+.ap-msg-error {
+  background: #FEF2F2;
+  color: #991B1B;
+}
+
+/* Center container */
+.ap-center {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 410px;
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Invite card (internal padding kept) */
+.ap-invite-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  border-radius: 16px;
+  border: 1px solid #E3E3E3;
+  background: #EFEFEF;
+  height: 192px;
+}
+
+.ap-invite-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.ap-invite-sub {
+  margin: 0;
+}
+
+/* Join button */
+.ap-join-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 60px;
+  border-radius: 9999px;
+  border: 1px solid #FFDBD8;
+  background: #FFCA28;
+  cursor: pointer;
+}
+
+/* Footer text */
+.ap-footer-text {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Footer image */
+.ap-footer-image {
+  margin-top: 24px;
+  width: 100%;
+  opacity: 0.2;
+}
+
+/* Loading screen */
+.ap-loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.ap-loading-text {
+  margin-top: 12px;
+  color: #6b7280;
+}
+
+/* Modal backdrop and modal */
+.ap-backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.ap-modal-wrap {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.ap-modal {
+  width: 100%;
+  max-width: 440px;
+  height: 521px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Inputs (internal padding kept) */
+.ap-input {
+  width: 100%;
+  height: 52px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+/* Save and cancel buttons */
+.ap-save-btn {
+  height: 52px;
+  border-radius: 9999px;
+  background: #FFCA28;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ap-cancel-btn {
+  margin-top: 12px;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+
+
+@media (max-width: 768px) {
+  
+   .ap-root{max-width: 100%;}
+}
