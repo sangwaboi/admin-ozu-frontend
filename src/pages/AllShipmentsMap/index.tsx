@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { RidersAPI } from '../../lib/api';
+import { RidersAPI, authenticatedFetch } from '../../lib/api';
 import type { Rider } from '../../types/rider';
 
 // Fix for default marker icons in React-Leaflet
@@ -155,19 +155,43 @@ function AllShipmentsMap() {
   const fetchAllRiders = async () => {
     try {
       const riders = await RidersAPI.listLive();
-      setAllRiders(riders || []);
-    } catch (error) {
+      // Ensure we always have an array
+      setAllRiders(Array.isArray(riders) ? riders : []);
+    } catch (error: any) {
       console.error('Failed to fetch riders:', error);
+      // If it's a CORS error, log it but don't break the app
+      if (error?.message?.includes('CORS') || error?.message?.includes('Failed to fetch')) {
+        console.warn('CORS error fetching riders - backend needs to allow authorization header');
+      }
+      setAllRiders([]); // Set empty array on error
     }
   };
 
   const fetchAllShipments = async (adminMobile: string) => {
     try {
-      // Fetch only shipments for the current admin
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/shipments/active?adminMobile=${encodeURIComponent(adminMobile)}`
+      // Use authenticated fetch with proper error handling
+      const response = await authenticatedFetch(
+        `/shipments/active?adminMobile=${encodeURIComponent(adminMobile)}`
       );
+      
+      if (!response.ok) {
+        if (response.status === 403) {
+          console.error('403 Forbidden: Authentication failed or insufficient permissions');
+          setLoading(false);
+          return;
+        }
+        throw new Error(`${response.status} ${response.statusText}`);
+      }
+      
       const data = await response.json();
+      
+      // Handle non-array responses (error objects)
+      if (!Array.isArray(data)) {
+        console.error('API returned non-array response:', data);
+        setShipments([]);
+        setLoading(false);
+        return;
+      }
       
       // Parse customer locations and fetch rider locations
       const shipmentsWithLocations = await Promise.all(
