@@ -181,6 +181,9 @@ export const CacheKeys = {
   // Issues
   ISSUES_PENDING: 'issues_pending',
   ISSUES_BY_SHIPMENT: (shipmentId: string | number) => `issues_shipment_${shipmentId}`,
+  
+  // Rider Locations (cached for fast display)
+  RIDER_LOCATION: (riderId: string | number) => `rider_location_${riderId}`,
 } as const;
 
 /**
@@ -192,5 +195,6 @@ export const CacheTTL = {
   SHIPMENTS_ACTIVE: 30 * 1000, // 30 seconds (active shipments change frequently)
   SHIPMENTS_COMPLETED: 5 * 60 * 1000, // 5 minutes (completed shipments change less frequently)
   ISSUES: 1 * 60 * 1000, // 1 minute
+  RIDER_LOCATION: 10 * 1000, // 10 seconds (rider location updates frequently)
 } as const;
 

@@ -153,9 +153,32 @@ export const ShipmentAPI = {
   },
   
   getRiderLocation: async (riderId: string) => {
+    // Check cache first for instant display
+    const cacheKey = CacheKeys.RIDER_LOCATION(riderId);
+    const cached = cache.get<{ lat: number; lng: number; updated_at?: string }>(cacheKey);
+    if (cached) {
+      // Return cached data immediately, but still fetch fresh in background
+      setTimeout(() => {
+        authenticatedFetch(`/riders/${riderId}/location`)
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (data) {
+              cache.set(cacheKey, data, CacheTTL.RIDER_LOCATION);
+            }
+          })
+          .catch(() => {}); // Silent fail for background update
+      }, 0);
+      return cached;
+    }
+    
+    // Fetch fresh data
     const response = await authenticatedFetch(`/riders/${riderId}/location`);
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-    return response.json();
+    const data = await response.json();
+    
+    // Cache the result
+    cache.set(cacheKey, data, CacheTTL.RIDER_LOCATION);
+    return data;
   },
   
   resendNotification: async (shipmentId: number) => {
